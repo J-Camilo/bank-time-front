@@ -1,12 +1,11 @@
-import { Modal, List, Avatar, Rate, Tag, Button, Typography, Space } from 'antd';
-import { UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { User, Clock } from 'lucide-react';
+import Modal from '../ui/Modal';
 import { publicacionesService } from '../../services/publicaciones';
 import { solicitudesService } from '../../services/solicitudes';
+import { useToast } from '../ui/Toast';
 import type { Publicacion } from './PublicacionCard';
-
-const { Text, Title } = Typography;
 
 interface Props {
   pub: Publicacion | null;
@@ -14,7 +13,14 @@ interface Props {
   onClose: () => void;
 }
 
+const StarRating = ({ value }: { value: number }) => (
+  <span className="text-xs text-yellow-400">
+    {'★'.repeat(Math.round(value))}{'☆'.repeat(5 - Math.round(value))}
+  </span>
+);
+
 const MatchModal = ({ pub, open, onClose }: Props) => {
+  const { show } = useToast();
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -30,60 +36,54 @@ const MatchModal = ({ pub, open, onClose }: Props) => {
     setLoading(true);
     try {
       await solicitudesService.crear({ publicacion_id: matchPubId });
-      Modal.success({ title: '¡Solicitud enviada!', content: 'El propietario recibirá una notificación.' });
+      show('¡Solicitud enviada! El propietario recibirá una notificación.');
       onClose();
     } catch (err: any) {
-      Modal.error({ title: 'Error', content: err.response?.data?.error || 'No se pudo enviar la solicitud' });
+      show(err.response?.data?.error || 'No se pudo enviar la solicitud', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal
-      open={open} onCancel={onClose} footer={null}
-      title={<Title level={5} style={{ margin: 0 }}>Matches para: {pub?.titulo}</Title>}
-      width={500}
-    >
+    <Modal open={open} onClose={onClose} title={`Matches para: ${pub?.titulo ?? ''}`} maxWidth="max-w-[500px]">
       {matches.length === 0 ? (
-        <Text type="secondary">No hay publicaciones compatibles en este momento.</Text>
+        <p className="text-sm text-gray-400 text-center py-6">
+          No hay publicaciones compatibles en este momento.
+        </p>
       ) : (
-        <List
-          dataSource={matches}
-          renderItem={(m: any, i) => (
-            <motion.div
+        <ul className="space-y-3">
+          {matches.map((m, i) => (
+            <motion.li
+              key={m.id}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.06 }}
+              className="card-3d flex items-center gap-3 p-3"
             >
-              <List.Item
-                actions={[
-                  <Button type="primary" size="small" loading={loading}
-                    style={{ background: '#0A9BAF', border: 'none', borderRadius: 6 }}
-                    onClick={() => solicitar(m.id)}>
-                    Solicitar
-                  </Button>
-                ]}
+              <div className="w-9 h-9 rounded-full bg-sky-mid flex items-center justify-center flex-shrink-0">
+                <User size={16} className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-800 truncate">{m.titulo}</p>
+                <p className="text-xs text-gray-500">{m.nombre} {m.apellido}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <StarRating value={m.promedio_valoracion || 0} />
+                  <span className="text-xs text-sky-mid flex items-center gap-1">
+                    <Clock size={10} /> {m.creditos_hora} créditos
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => solicitar(m.id)}
+                disabled={loading}
+                className="btn-primary text-xs px-4 py-1.5 flex-shrink-0"
               >
-                <List.Item.Meta
-                  avatar={<Avatar style={{ background: '#0A9BAF' }} icon={<UserOutlined />} />}
-                  title={<Text strong style={{ fontSize: 13 }}>{m.titulo}</Text>}
-                  description={
-                    <Space direction="vertical" size={2}>
-                      <Text style={{ fontSize: 12 }}>{m.nombre} {m.apellido}</Text>
-                      <Space size={8}>
-                        <Rate disabled defaultValue={m.promedio_valoracion || 0} style={{ fontSize: 10 }} allowHalf />
-                        <Tag style={{ background: '#E6F7FF', border: 'none', color: '#0A9BAF', fontSize: 11 }}>
-                          <ClockCircleOutlined /> {m.creditos_hora} créditos
-                        </Tag>
-                      </Space>
-                    </Space>
-                  }
-                />
-              </List.Item>
-            </motion.div>
-          )}
-        />
+                Solicitar
+              </button>
+            </motion.li>
+          ))}
+        </ul>
       )}
     </Modal>
   );

@@ -131,7 +131,7 @@ export default function Perfil() {
               <div>
                 <p className="text-sm font-medium text-gray-700">{user?.correo}</p>
                 <p className="text-xs text-gray-400">
-                  {user?.created_at ? dayjs(user.created_at).fromNow() : '1 month ago'}
+                  {user?.created_at ? `Desde ${dayjs(user.created_at).format('DD/MM/YYYY')}` : ''}
                 </p>
               </div>
             </div>
