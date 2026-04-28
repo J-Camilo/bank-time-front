@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Clock, User, Calendar, MapPin } from 'lucide-react';
+import { Clock, MapPin, Calendar, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { solicitudesService } from '../services/solicitudes';
 import { useToast } from '../components/ui/Toast';
@@ -7,9 +7,10 @@ import dayjs from 'dayjs';
 
 export default function SolicitudesEnviadas() {
   const { show } = useToast();
-  const [list, setList]       = useState<any[]>([]);
-  const [sel, setSel]         = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [list, setList]             = useState<any[]>([]);
+  const [sel, setSel]               = useState<any>(null);
+  const [loading, setLoading]       = useState(true);
+  const [showDetail, setShowDetail] = useState(false);
 
   useEffect(() => {
     solicitudesService.enviadas()
@@ -18,13 +19,20 @@ export default function SolicitudesEnviadas() {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleSelect = (s: any) => {
+    setSel(s);
+    setShowDetail(true);
+  };
+
   const SolicitudCard = ({ s }: { s: any }) => {
     const active = sel?.id === s.id;
     return (
       <motion.div
         whileHover={{ scale: 1.01 }}
-        onClick={() => setSel(s)}
-        className={`p-4 rounded-2xl mb-3 cursor-pointer transition-colors ${active ? 'bg-navy text-white' : 'bg-white border border-gray-100 hover:border-navy/20'}`}
+        onClick={() => handleSelect(s)}
+        className={`p-4 rounded-2xl mb-3 cursor-pointer transition-colors ${
+          active ? 'bg-navy text-white' : 'bg-white border border-gray-100 hover:border-navy/20'
+        }`}
       >
         <p className={`text-xs mb-1 ${active ? 'text-white/50' : 'text-gray-400'}`}>
           Este servicio caduca {dayjs(s.fecha_propuesta || s.fecha_solicitud).format('DD/MM/YYYY')}
@@ -45,9 +53,10 @@ export default function SolicitudesEnviadas() {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col md:flex-row h-full">
       {/* Left list */}
-      <div className="w-72 border-r border-gray-100 p-4 overflow-y-auto flex-shrink-0">
+      <div className={`md:w-72 md:border-r border-gray-100 p-4 overflow-y-auto md:flex-shrink-0
+        ${showDetail ? 'hidden md:block' : 'block'}`}>
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Mis solicitudes</p>
         {loading ? (
           Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-24 bg-gray-100 rounded-2xl mb-3 animate-pulse" />)
@@ -59,14 +68,22 @@ export default function SolicitudesEnviadas() {
       </div>
 
       {/* Right detail */}
-      <div className="flex-1 p-8 overflow-y-auto">
+      <div className={`flex-1 p-5 md:p-8 overflow-y-auto ${!showDetail ? 'hidden md:flex' : 'flex'} flex-col`}>
         {!sel ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             <p>Selecciona una solicitud</p>
           </div>
         ) : (
           <motion.div key={sel.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <h1 className="text-3xl font-black text-gray-900 mb-4">{sel.publicacion_titulo}</h1>
+            {/* Mobile back button */}
+            <button
+              onClick={() => setShowDetail(false)}
+              className="md:hidden flex items-center gap-1.5 text-sm text-gray-500 hover:text-navy mb-4 transition-colors"
+            >
+              <ArrowLeft size={16} /> Volver a mis solicitudes
+            </button>
+
+            <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-4">{sel.publicacion_titulo}</h1>
             <p className="text-sm text-gray-600 leading-relaxed mb-6 text-justify">
               Lorem Ipsum is simply dummy text of the printing and typesetting industry.
             </p>
@@ -114,7 +131,7 @@ export default function SolicitudesEnviadas() {
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <button className="btn-outline">Descartar solicitud</button>
               <button className="btn-primary">Guardar cambios</button>
             </div>

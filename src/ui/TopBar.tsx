@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Bell, ChevronDown, Settings, LogOut } from 'lucide-react';
+import { Search, Bell, ChevronDown, Settings, LogOut, Menu } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../store';
@@ -9,7 +9,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface Notif { id: number; titulo: string; mensaje: string; leida: boolean; }
 
-const TopBar = () => {
+interface TopBarProps {
+  onMenuClick?: () => void;
+}
+
+const TopBar = ({ onMenuClick }: TopBarProps) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((s: RootState) => s.auth.user);
@@ -28,7 +32,6 @@ const TopBar = () => {
       .catch(() => {});
   }, []);
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
@@ -52,30 +55,47 @@ const TopBar = () => {
 
   const doLogout = () => { dispatch(logout()); navigate('/login'); };
 
+  const initials = `${user?.nombre?.charAt(0) ?? ''}${user?.apellido?.charAt(0) ?? ''}`;
+
   return (
-    <header className="bg-white border-b border-gray-100 h-16 flex items-center justify-between px-6 flex-shrink-0">
+    <header
+      className="bg-white rounded-2xl h-14 md:h-16 flex items-center justify-between px-3 md:px-6 lg:px-8"
+      style={{ boxShadow: 'var(--shadow-ui)' }}
+    >
+      {/* Hamburger — mobile only */}
+      <button
+        onClick={onMenuClick}
+        className="md:hidden w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors flex-shrink-0 mr-2"
+        style={{ boxShadow: 'var(--shadow-ui)' }}
+      >
+        <Menu size={16} className="text-gray-600" />
+      </button>
+
       {/* Search */}
-      <div className="relative flex-1 max-w-lg">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+      <div className="relative flex-1 max-w-xs md:max-w-md">
+        <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
         <input
-          className="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:border-navy focus:bg-white transition-colors"
-          placeholder="Buscar publicación de servicio"
+          className="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm bg-white rounded-2xl placeholder-gray-400
+                     focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all duration-200"
+          style={{ boxShadow: 'var(--shadow-ui)' }}
+          placeholder="Buscar publicación"
           value={search}
           onChange={e => setSearch(e.target.value)}
           onKeyDown={handleSearch}
         />
       </div>
 
-      <div className="flex items-center gap-4 ml-6">
-        {/* Notifications */}
+      <div className="flex items-center gap-2 md:gap-3 ml-2 md:ml-4">
+        {/* Bell */}
         <div ref={notifRef} className="relative">
           <button
             onClick={() => setNotifOpen(p => !p)}
-            className="relative p-2 rounded-xl hover:bg-gray-50 transition-colors"
+            className="relative w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-gray-50 flex items-center justify-center transition-all duration-200 hover:bg-gray-100"
+            style={{ boxShadow: 'var(--shadow-ui)' }}
           >
-            <Bell size={18} className="text-gray-500" />
+            <Bell size={16} className={unread > 0 ? 'text-navy' : 'text-gray-500'} />
             {unread > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-sky-mid text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-sky-mid text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                 {unread}
               </span>
             )}
@@ -84,10 +104,12 @@ const TopBar = () => {
           <AnimatePresence>
             {notifOpen && (
               <motion.div
-                initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                initial={{ opacity: 0, y: 8, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                className="absolute right-0 top-12 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+                exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-0 w-72 md:w-80 bg-white rounded-2xl overflow-hidden z-50"
+                style={{ boxShadow: 'var(--shadow-focus)', top: '3.25rem' }}
               >
                 <div className="px-4 py-3 border-b border-gray-100">
                   <span className="text-sm font-semibold text-gray-900">Notificaciones</span>
@@ -95,66 +117,84 @@ const TopBar = () => {
                 <div className="max-h-72 overflow-y-auto">
                   {notifs.length === 0 ? (
                     <p className="text-center text-sm text-gray-400 py-8">Sin notificaciones</p>
-                  ) : (
-                    notifs.map(n => (
-                      <button
-                        key={n.id}
-                        onClick={() => markRead(n)}
-                        className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 ${!n.leida ? 'bg-blue-50/50' : ''}`}
-                      >
-                        <p className="text-xs font-semibold text-gray-800 mb-0.5">{n.titulo}</p>
-                        <p className="text-xs text-gray-500">{n.mensaje}</p>
-                      </button>
-                    ))
-                  )}
+                  ) : notifs.map(n => (
+                    <button key={n.id} onClick={() => markRead(n)}
+                      className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 ${!n.leida ? 'bg-blue-50/40' : ''}`}>
+                      <p className="text-xs font-semibold text-gray-800 mb-0.5">{n.titulo}</p>
+                      <p className="text-xs text-gray-500">{n.mensaje}</p>
+                    </button>
+                  ))}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* User dropdown */}
+        {/* Separator */}
+        <div className="hidden sm:block w-px h-7 bg-gray-200" />
+
+        {/* User */}
         <div ref={userRef} className="relative">
           <button
             onClick={() => setUserOpen(p => !p)}
-            className="flex items-center gap-3 hover:bg-gray-50 rounded-xl px-3 py-2 transition-colors"
+            className="flex items-center gap-2 rounded-2xl pl-1 pr-2 md:pr-3 py-1 transition-all duration-200 hover:bg-gray-50"
+            style={{ boxShadow: 'var(--shadow-ui)' }}
           >
-            {/* Avatar */}
-            <div className="w-9 h-9 rounded-full bg-navy flex items-center justify-center text-white text-sm font-bold">
-              {user?.nombre?.charAt(0)}{user?.apellido?.charAt(0)}
+            <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-navy flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+              {initials}
             </div>
-            <div className="text-left hidden sm:block">
-              <p className="text-sm font-semibold text-gray-800 leading-none">{user?.nombre} {user?.apellido}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{user?.correo}</p>
+            <div className="text-left hidden lg:block">
+              <p className="text-sm font-semibold text-gray-800 leading-tight">
+                {user?.nombre} {user?.apellido}
+              </p>
+              <p className="text-[11px] text-gray-400 leading-tight truncate max-w-[140px]">
+                {user?.correo}
+              </p>
             </div>
-            <ChevronDown size={14} className={`text-gray-400 transition-transform ${userOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              size={14}
+              className={`hidden sm:block text-gray-400 transition-transform duration-200 flex-shrink-0 ${userOpen ? 'rotate-180' : ''}`}
+            />
           </button>
 
           <AnimatePresence>
             {userOpen && (
               <motion.div
-                initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                initial={{ opacity: 0, y: 8, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                className="absolute right-0 top-14 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+                exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-0 w-60 bg-white rounded-2xl overflow-hidden z-50"
+                style={{ boxShadow: 'var(--shadow-focus)', top: '3.25rem' }}
               >
                 <div className="p-4 border-b border-gray-100 flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-navy flex items-center justify-center text-white font-bold">
-                    {user?.nombre?.charAt(0)}{user?.apellido?.charAt(0)}
+                  <div className="w-11 h-11 rounded-xl bg-navy flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    {initials}
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800">{user?.nombre} {user?.apellido}</p>
-                    <p className="text-xs text-gray-400">{user?.correo}</p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-800 leading-tight">
+                      {user?.nombre} {user?.apellido}
+                    </p>
+                    <p className="text-[11px] text-gray-400 truncate leading-tight mt-0.5">
+                      {user?.correo}
+                    </p>
                   </div>
                 </div>
+
                 <div className="p-2">
-                  <button onClick={() => { navigate('/perfil'); setUserOpen(false); }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                    <Settings size={14} /> Ir al perfil
+                  <button
+                    onClick={() => { navigate('/perfil'); setUserOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
+                  >
+                    <Settings size={14} className="text-gray-400" />
+                    Ir al perfil
                   </button>
-                  <button onClick={doLogout}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                    <LogOut size={14} /> Cerrar sesión
+                  <button
+                    onClick={doLogout}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                  >
+                    <LogOut size={14} />
+                    Cerrar sesión
                   </button>
                 </div>
               </motion.div>

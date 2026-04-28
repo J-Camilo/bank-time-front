@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Clock, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Check, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { intercambiosService } from '../services/intercambios';
 import { ConfirmarModal } from '../components/Modals/ConfirmarModal';
@@ -24,6 +24,7 @@ export default function Intercambios() {
   const [intercambios, setIntercambios] = useState<any[]>([]);
   const [loading, setLoading]           = useState(true);
   const [selectedDay, setSelectedDay]   = useState(dayjs());
+  const [showCalendar, setShowCalendar] = useState(false);
   const [confirmar, setConfirmar]       = useState<{ open: boolean; item: any }>({ open: false, item: null });
   const [valoracion, setValoracion]     = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
   const [cancelar, setCancelar]         = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
@@ -42,8 +43,10 @@ export default function Intercambios() {
     const s = STATUS_STYLE[i.estado] || STATUS_STYLE.EN_ESPERA;
     const label = i.estado.replace('_', ' ');
     return (
-      <div className={`${s.bg} rounded-2xl p-4 mb-3 relative overflow-hidden`}>
-        {/* Ribbon badge */}
+      <div
+        className={`${s.bg} rounded-2xl p-4 mb-3 relative overflow-hidden cursor-pointer`}
+        onClick={() => setShowCalendar(true)}
+      >
         <span className={`absolute top-3 right-3 ${s.ribbon} text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full`}>
           {label}
         </span>
@@ -57,15 +60,17 @@ export default function Intercambios() {
           </span>
           {i.estado === 'EN_CURSO' && (
             <button
-              onClick={() => setConfirmar({ open: true, item: i })}
+              onClick={e => { e.stopPropagation(); setConfirmar({ open: true, item: i }); }}
               className="w-7 h-7 rounded-full bg-green-400 flex items-center justify-center hover:bg-green-500 transition-colors"
             >
               <Check size={14} className="text-white" />
             </button>
           )}
           {i.estado === 'COMPLETADO' && (
-            <button onClick={() => setValoracion({ open: true, id: i.id })}
-              className="text-xs text-sky-mid hover:underline font-semibold">
+            <button
+              onClick={e => { e.stopPropagation(); setValoracion({ open: true, id: i.id }); }}
+              className="text-xs text-sky-mid hover:underline font-semibold"
+            >
               Ver info
             </button>
           )}
@@ -75,9 +80,10 @@ export default function Intercambios() {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col lg:flex-row h-full">
       {/* Left: list */}
-      <div className="w-72 border-r border-gray-100 p-4 overflow-y-auto flex-shrink-0">
+      <div className={`lg:w-72 lg:border-r border-gray-100 p-4 overflow-y-auto lg:flex-shrink-0
+        ${showCalendar ? 'hidden lg:block' : 'block'}`}>
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Intercambio</p>
         {loading ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-28 bg-gray-100 rounded-2xl mb-3 animate-pulse" />)
           : intercambios.length === 0 ? <p className="text-sm text-gray-400 text-center mt-8">Sin intercambios aún</p>
@@ -86,7 +92,15 @@ export default function Intercambios() {
       </div>
 
       {/* Right: day calendar */}
-      <div className="flex-1 p-6 overflow-hidden flex flex-col">
+      <div className={`flex-1 p-4 md:p-6 overflow-hidden flex flex-col ${!showCalendar ? 'hidden lg:flex' : 'flex'}`}>
+        {/* Mobile back button */}
+        <button
+          onClick={() => setShowCalendar(false)}
+          className="lg:hidden flex items-center gap-1.5 text-sm text-gray-500 hover:text-navy mb-4 transition-colors"
+        >
+          <ArrowLeft size={16} /> Volver a intercambios
+        </button>
+
         {/* Day navigation */}
         <div className="flex items-center justify-between mb-4">
           <button onClick={() => setSelectedDay(d => d.subtract(1, 'day'))}
@@ -95,7 +109,7 @@ export default function Intercambios() {
           </button>
           <div className="text-center">
             <p className="text-sm text-gray-500 font-medium capitalize">{selectedDay.format('dddd')}</p>
-            <p className="text-5xl font-black text-gray-900">{selectedDay.format('D')}</p>
+            <p className="text-4xl md:text-5xl font-black text-gray-900">{selectedDay.format('D')}</p>
           </div>
           <button onClick={() => setSelectedDay(d => d.add(1, 'day'))}
             className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
@@ -108,12 +122,9 @@ export default function Intercambios() {
           <div className="relative">
             {HOURS.map(h => {
               const label = h <= 12 ? `${h} AM` : `${h - 12} PM`;
-              const slotIntercambios = dayIntercambios.filter(i => {
-                const hour = dayjs(i.fecha_acordada).hour();
-                return hour === h;
-              });
+              const slotIntercambios = dayIntercambios.filter(i => dayjs(i.fecha_acordada).hour() === h);
               return (
-                <div key={h} className="flex items-start gap-3 min-h-[52px] border-b border-gray-50 group">
+                <div key={h} className="flex items-start gap-3 min-h-[52px] border-b border-gray-50">
                   <span className="text-xs text-gray-400 w-12 text-right flex-shrink-0 pt-1">{label}</span>
                   <div className="flex-1 relative">
                     {slotIntercambios.map(i => (
@@ -122,8 +133,7 @@ export default function Intercambios() {
                         className="absolute top-0.5 left-0 right-0 bg-sky-mid text-white rounded-lg px-3 py-1.5 text-xs font-semibold z-10"
                       >
                         <p className="font-bold truncate uppercase">{i.publicacion_titulo}</p>
-                        <p className="text-white/70">{dayjs(i.fecha_acordada).format('HH:mm')} AM – 10:00 PM</p>
-                        <p className="text-white/70">{i.prestador_nombre} {i.prestador_apellido}</p>
+                        <p className="text-white/70">{dayjs(i.fecha_acordada).format('HH:mm')} – {i.prestador_nombre}</p>
                       </motion.div>
                     ))}
                     <div className="h-12" />

@@ -7,15 +7,36 @@ import dayjs from 'dayjs';
 
 interface Props { pub?: any; open: boolean; onClose: () => void; onSuccess?: () => void; }
 
+const SpinInput = ({ label, value, min = 1, max = 99, onChange }: {
+  label: string; value: number; min?: number; max?: number; onChange: (v: number) => void;
+}) => (
+  <div>
+    <label className="text-xs font-medium text-gray-400 mb-1.5 block">{label}</label>
+    <div className="flex items-center rounded-2xl bg-white overflow-hidden" style={{ boxShadow: 'var(--shadow-ui)' }}>
+      <input
+        type="number" min={min} max={max} value={value}
+        onChange={e => onChange(Math.min(max, Math.max(min, parseInt(e.target.value) || min)))}
+        className="flex-1 px-3 py-3 text-sm font-semibold text-center text-gray-800 focus:outline-none bg-transparent w-0"
+      />
+      <div className="flex flex-col border-l border-gray-100">
+        <button type="button" onClick={() => onChange(Math.min(max, value + 1))}
+          className="px-2.5 py-1.5 text-[10px] text-gray-400 hover:bg-gray-50 hover:text-navy transition-colors leading-none">▲</button>
+        <button type="button" onClick={() => onChange(Math.max(min, value - 1))}
+          className="px-2.5 py-1.5 text-[10px] text-gray-400 hover:bg-gray-50 hover:text-navy transition-colors border-t border-gray-100 leading-none">▼</button>
+      </div>
+    </div>
+  </div>
+);
+
 export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) => {
   const { show } = useToast();
-  const [loading, setLoading]     = useState(false);
-  const [categorias, setCategorias] = useState<any[]>([]);
+  const [loading, setLoading]       = useState(false);
+  const [_categorias, setCategorias] = useState<any[]>([]);
   const isEdit = !!pub;
 
   const [f, setF] = useState({
     titulo: '', creditos: 1, horas: 1,
-    fecha_expiracion: '', descripcion: '', ubicacion: '', categoria_id: '',
+    fecha_expiracion: '', descripcion: '', ubicacion: '', direccion: '', categoria_id: '',
   });
   const up = (k: string, v: any) => setF(p => ({ ...p, [k]: v }));
 
@@ -26,16 +47,17 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
   useEffect(() => {
     if (pub && open) {
       setF({
-        titulo: pub.titulo || '',
-        creditos: pub.creditos_hora || 1,
-        horas: 1,
+        titulo:           pub.titulo || '',
+        creditos:         pub.creditos_hora || 1,
+        horas:            1,
         fecha_expiracion: pub.fecha_expiracion ? dayjs(pub.fecha_expiracion).format('YYYY-MM-DD') : '',
-        descripcion: pub.descripcion || '',
-        ubicacion: pub.municipio || '',
-        categoria_id: pub.categoria_id || '',
+        descripcion:      pub.descripcion || '',
+        ubicacion:        pub.municipio || '',
+        direccion:        pub.direccion || '',
+        categoria_id:     pub.categoria_id || '',
       });
     } else if (!open) {
-      setF({ titulo: '', creditos: 1, horas: 1, fecha_expiracion: '', descripcion: '', ubicacion: '', categoria_id: '' });
+      setF({ titulo: '', creditos: 1, horas: 1, fecha_expiracion: '', descripcion: '', ubicacion: '', direccion: '', categoria_id: '' });
     }
   }, [pub, open]);
 
@@ -44,11 +66,11 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
     setLoading(true);
     try {
       const payload = {
-        titulo: f.titulo,
-        descripcion: f.descripcion,
-        creditos_hora: f.creditos,
+        titulo:           f.titulo,
+        descripcion:      f.descripcion,
+        creditos_hora:    f.creditos,
         fecha_expiracion: dayjs(f.fecha_expiracion).format('YYYY-MM-DD'),
-        categoria_id: f.categoria_id ? parseInt(f.categoria_id) : undefined,
+        categoria_id:     f.categoria_id ? parseInt(f.categoria_id) : undefined,
       };
       if (isEdit) {
         await publicacionesService.actualizar(pub.id, payload);
@@ -79,90 +101,102 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
       open={open}
       onClose={onClose}
       title={isEdit ? 'Edición de la publicación' : 'Creación de la publicación'}
-      maxWidth="max-w-lg"
+      maxWidth="max-w-2xl"
     >
-      <form onSubmit={save} className="space-y-4">
-        {/* Top row: title + date */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <label className="text-xs text-gray-400 mb-1 block">Nombre de la publicación</label>
-            <input className="input-field" value={f.titulo} onChange={e => up('titulo', e.target.value)}
-              placeholder="Clase de inglés" required />
+      <form onSubmit={save} className="space-y-5">
+
+        {/* Título + fecha creación */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-medium text-gray-400">Nombre de la publicación</label>
+            {isEdit && (
+              <span className="text-xs text-gray-400 italic">
+                Fecha de creación: {pub?.created_at ? dayjs(pub.created_at).format('DD/MM/YYYY') : ''}
+              </span>
+            )}
           </div>
-          {isEdit && (
-            <div className="flex-shrink-0 text-right">
-              <p className="text-xs text-gray-400">Fecha de creación: {pub?.created_at ? dayjs(pub.created_at).format('DD/MM/YYYY') : ''}</p>
-            </div>
-          )}
+          <input
+            className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all"
+            style={{ boxShadow: 'var(--shadow-ui)' }}
+            value={f.titulo}
+            onChange={e => up('titulo', e.target.value)}
+            placeholder="Clase de inglés"
+            required
+          />
         </div>
 
-        {/* Credits + Hours + Date + Status */}
+        {/* Créditos · Horas · Fecha · Estado */}
         <div className="grid grid-cols-4 gap-3">
+          <SpinInput label="Créditos" value={f.creditos} max={24} onChange={v => up('creditos', v)} />
+          <SpinInput label="Horas propuesta" value={f.horas} onChange={v => up('horas', v)} />
+
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Créditos</label>
-            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-              <input type="number" min={1} max={24} value={f.creditos}
-                onChange={e => up('creditos', parseInt(e.target.value) || 1)}
-                className="flex-1 px-3 py-2.5 text-sm text-center focus:outline-none" />
-              <div className="flex flex-col border-l border-gray-200">
-                <button type="button" onClick={() => up('creditos', Math.min(24, f.creditos + 1))}
-                  className="px-2 py-1 text-xs hover:bg-gray-50">▲</button>
-                <button type="button" onClick={() => up('creditos', Math.max(1, f.creditos - 1))}
-                  className="px-2 py-1 text-xs hover:bg-gray-50 border-t border-gray-200">▼</button>
-              </div>
-            </div>
-          </div>
-          <div>
-            <label className="text-xs text-gray-400 mb-1 block">Horas propuesta</label>
-            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-              <input type="number" min={1} value={f.horas}
-                onChange={e => up('horas', parseInt(e.target.value) || 1)}
-                className="flex-1 px-3 py-2.5 text-sm text-center focus:outline-none" />
-              <div className="flex flex-col border-l border-gray-200">
-                <button type="button" onClick={() => up('horas', f.horas + 1)}
-                  className="px-2 py-1 text-xs hover:bg-gray-50">▲</button>
-                <button type="button" onClick={() => up('horas', Math.max(1, f.horas - 1))}
-                  className="px-2 py-1 text-xs hover:bg-gray-50 border-t border-gray-200">▼</button>
-              </div>
-            </div>
-          </div>
-          <div>
-            <label className="text-xs text-gray-400 mb-1 block">Fecha de expiración</label>
-            <input type="date" className="input-field text-xs" value={f.fecha_expiracion}
+            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Fecha de expiración</label>
+            <input
+              type="date"
+              className="w-full rounded-2xl px-3 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all bg-white"
+              style={{ boxShadow: 'var(--shadow-ui)' }}
+              value={f.fecha_expiracion}
               onChange={e => up('fecha_expiracion', e.target.value)}
-              min={dayjs().format('YYYY-MM-DD')} required />
+              min={dayjs().format('YYYY-MM-DD')}
+              required
+            />
           </div>
+
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Estado</label>
-            <div className="badge-activo inline-flex items-center justify-center py-2.5 px-3 rounded-xl w-full">
+            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Estado</label>
+            <div
+              className="w-full rounded-2xl py-3 flex items-center justify-center font-bold text-sm text-white tracking-wider"
+              style={{ background: 'linear-gradient(135deg, #003B54, #009ADB)', boxShadow: 'var(--shadow-dark)' }}
+            >
               ACTIVO
             </div>
           </div>
         </div>
 
-        {/* Description + Ubicación */}
-        <div className="grid grid-cols-3 gap-3">
+        {/* Descripción + Ubicación */}
+        <div className="grid grid-cols-3 gap-4">
           <div className="col-span-2">
-            <label className="text-xs text-gray-400 mb-1 block">Descripción de la publicación</label>
-            <textarea className="input-field resize-none" rows={4} value={f.descripcion}
-              onChange={e => up('descripcion', e.target.value)} placeholder="Describe el servicio..." />
+            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Descripción de la publicación</label>
+            <textarea
+              className="w-full rounded-2xl px-4 py-3 text-sm text-gray-800 placeholder-gray-300 resize-none focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all bg-white"
+              style={{ boxShadow: 'var(--shadow-ui)' }}
+              rows={5}
+              value={f.descripcion}
+              onChange={e => up('descripcion', e.target.value)}
+              placeholder="Describe el servicio..."
+            />
           </div>
+
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Ubicación</label>
-            <input className="input-field mb-2" value={f.ubicacion}
-              onChange={e => up('ubicacion', e.target.value)} placeholder="MEDELLÍN" />
-            <input className="input-field" placeholder="CRA B9 #102 B09" />
+            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Ubicación</label>
+            <div className="space-y-2.5">
+              <input
+                className="w-full rounded-2xl px-4 py-3 text-sm font-semibold text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all bg-white uppercase tracking-wide"
+                style={{ boxShadow: 'var(--shadow-ui)' }}
+                value={f.ubicacion}
+                onChange={e => up('ubicacion', e.target.value)}
+                placeholder="MEDELLÍN"
+              />
+              <input
+                className="w-full rounded-2xl px-4 py-3 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all bg-white"
+                style={{ boxShadow: 'var(--shadow-ui)' }}
+                value={f.direccion}
+                onChange={e => up('direccion', e.target.value)}
+                placeholder="CRA 89 #102 B09"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex items-center justify-between pt-2">
+        {/* Acciones */}
+        <div className="flex items-center justify-between pt-1">
           {isEdit ? (
             <button type="button" onClick={eliminar} className="btn-outline border-red-300 text-red-400 hover:bg-red-50">
               Eliminar publicación
             </button>
           ) : <div />}
-          <button type="submit" disabled={loading} className="btn-primary">
+          <button type="submit" disabled={loading} className="btn-primary px-8">
             {loading ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </div>

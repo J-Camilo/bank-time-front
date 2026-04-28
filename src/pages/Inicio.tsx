@@ -7,6 +7,7 @@ import { categoriasService } from '../services/categorias';
 import PublicacionCard, { type Publicacion } from '../components/PublicacionCard/PublicacionCard';
 import { SolicitudModal } from '../components/Modals/SolicitudModal';
 import { useToast } from '../components/ui/Toast';
+import Select from '../components/ui/Select';
 
 export default function Inicio() {
   const [params] = useSearchParams();
@@ -20,6 +21,7 @@ export default function Inicio() {
   const [catName, setCatName]       = useState('');
   const [modal, setModal]           = useState<{ open: boolean; pub: Publicacion | null }>({ open: false, pub: null });
   const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -46,7 +48,8 @@ export default function Inicio() {
       <div className="flex items-center gap-3 mb-5 flex-wrap">
         <button
           onClick={() => setShowFilters(p => !p)}
-          className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-2 text-sm text-gray-600 hover:border-navy hover:text-navy transition-colors"
+          className="flex items-center gap-2 bg-white rounded-2xl px-4 py-2.5 text-sm text-gray-600 hover:text-navy transition-colors"
+          style={{ boxShadow: 'var(--shadow-ui)' }}
         >
           <Filter size={14} /> Filtros
         </button>
@@ -54,21 +57,28 @@ export default function Inicio() {
           <span className="text-sm text-gray-600">Resultados para <strong>"{q}"</strong></span>
         )}
         {catName && (
-          <div className="flex items-center gap-1.5 bg-navy/10 text-navy rounded-full px-3 py-1.5 text-xs font-semibold">
+          <div
+            className="flex items-center gap-1.5 rounded-2xl px-3 py-2 text-xs font-semibold text-white"
+            style={{ background: 'linear-gradient(135deg, #003B54, #009ADB)', boxShadow: 'var(--shadow-dark)' }}
+          >
             {catName}
-            <button onClick={clearFilter}><X size={12} /></button>
+            <button onClick={clearFilter} className="hover:opacity-70 transition-opacity"><X size={12} /></button>
           </div>
         )}
         {catName && (
           <button onClick={clearFilter} className="text-xs text-gray-400 hover:text-gray-600">Limpiar todo</button>
         )}
         <div className="ml-auto">
-          <select className="text-sm border border-gray-200 rounded-xl px-3 py-2 text-gray-600 focus:outline-none focus:border-navy">
-            <option>Ordenar por</option>
-            <option>Más recientes</option>
-            <option>Mejor valorados</option>
-            <option>Más créditos</option>
-          </select>
+          <Select
+            value={sortBy}
+            onChange={setSortBy}
+            placeholder="Ordenar por"
+            options={[
+              { value: 'recientes', label: 'Más recientes' },
+              { value: 'valorados', label: 'Mejor valorados' },
+              { value: 'creditos', label: 'Más créditos' },
+            ]}
+          />
         </div>
       </div>
 
@@ -90,7 +100,7 @@ export default function Inicio() {
 
       {/* Grid */}
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6 pt-2">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="bg-gray-100 rounded-2xl h-48 animate-pulse" />
           ))}
@@ -101,7 +111,7 @@ export default function Inicio() {
           <p className="text-sm mt-1">Intenta con otros filtros</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6 pt-2">
           {pubs.map((pub, i) => (
             <PublicacionCard
               key={pub.id}

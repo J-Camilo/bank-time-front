@@ -1,19 +1,21 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Landmark } from 'lucide-react';
+import { Landmark, X } from 'lucide-react';
 
 interface NavItemProps {
   to: string;
   label: string;
   sub?: boolean;
+  onClose?: () => void;
 }
 
-const NavItem = ({ to, label, sub }: NavItemProps) => {
+const NavItem = ({ to, label, sub, onClose }: NavItemProps) => {
   const { pathname } = useLocation();
   const active = pathname === to || pathname.startsWith(to + '/');
 
   return (
     <Link
       to={to}
+      onClick={onClose}
       className={`block py-2 text-sm transition-colors duration-150 ${
         sub ? 'ml-3' : ''
       } ${
@@ -27,38 +29,52 @@ const NavItem = ({ to, label, sub }: NavItemProps) => {
   );
 };
 
-const Nav = () => {
+interface NavProps {
+  onClose?: () => void;
+}
+
+const Nav = ({ onClose }: NavProps) => {
   const { pathname } = useLocation();
   const inSolicitudes = pathname.startsWith('/solicitudes');
 
   return (
-    <aside className="w-52 bg-white border-r border-gray-100 flex flex-col h-full flex-shrink-0">
+    <aside
+      className="w-52 bg-white rounded-2xl flex flex-col flex-shrink-0 overflow-hidden"
+      style={{ height: 'calc(100vh - 2rem)', boxShadow: 'var(--shadow-ui)' }}
+    >
       {/* Logo */}
-      <div className="px-5 py-6 border-b border-gray-100">
-        <Link to="/dashboard" className="flex items-center gap-2">
+      <div className="px-5 py-6 border-b border-gray-100/60 flex items-center justify-between">
+        <Link to="/dashboard" onClick={onClose} className="flex items-center gap-2">
           <Landmark size={22} className="text-navy" />
           <span className="text-navy font-bold text-xl tracking-tight">BOTIme.</span>
         </Link>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden p-1.5 rounded-xl hover:bg-gray-100 text-gray-400 transition-colors"
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-4 space-y-0.5">
-        <NavItem to="/dashboard" label="Dashboard" />
-        <NavItem to="/inicio" label="Inicio" />
+        <NavItem to="/dashboard" label="Dashboard" onClose={onClose} />
+        <NavItem to="/inicio" label="Inicio" onClose={onClose} />
 
-        {/* Solicitudes group */}
         <div className="py-1">
           <span className={`block py-2 text-sm pl-3 border-l-2 border-transparent transition-colors ${
             inSolicitudes ? 'text-navy font-semibold' : 'text-gray-500'
           }`}>
             Solicitudes
           </span>
-          <NavItem to="/solicitudes/mis" label="Mis solicitudes" sub />
-          <NavItem to="/solicitudes/pendientes" label="Solicitudes pendientes" sub />
+          <NavItem to="/solicitudes/mis" label="Mis solicitudes" sub onClose={onClose} />
+          <NavItem to="/solicitudes/pendientes" label="Solicitudes pendientes" sub onClose={onClose} />
         </div>
 
-        <NavItem to="/intercambios" label="Intercambio" />
-        <NavItem to="/historial" label="Historial" />
+        <NavItem to="/intercambios" label="Intercambio" onClose={onClose} />
+        <NavItem to="/historial" label="Historial" onClose={onClose} />
       </nav>
     </aside>
   );

@@ -37,7 +37,6 @@ export default function Historial() {
   const ganados  = movs.filter((m: any) => m.tipo === 'GANANCIA').reduce((a: number, m: any) => a + m.cantidad, 0);
   const gastados = movs.filter((m: any) => m.tipo === 'CONSUMO').reduce((a: number, m: any) => a + m.cantidad, 0);
 
-  // Chart data: last 30 days
   const chartData = Array.from({ length: 15 }, (_, i) => {
     const date = dayjs().subtract(14 - i, 'day');
     const dayMovs = movs.filter((m: any) => dayjs(m.fecha).isSame(date, 'day'));
@@ -63,24 +62,22 @@ export default function Historial() {
 
   const StatItem = ({ icon, label, value, sub, trend }: any) => (
     <div className="flex items-center gap-4 py-4 border-b border-gray-100 last:border-0">
-      <div className="w-14 h-14 rounded-full bg-sky-mid/10 flex items-center justify-center">
-        <span className="text-2xl">{icon}</span>
+      <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-sky-mid/10 flex items-center justify-center flex-shrink-0">
+        <span className="text-xl md:text-2xl">{icon}</span>
       </div>
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <p className="text-xs text-gray-400 mb-0.5">{label}</p>
-        <p className="text-3xl font-black text-gray-900">{value}</p>
+        <p className="text-2xl md:text-3xl font-black text-gray-900">{value}</p>
         {trend && <p className={`text-xs font-semibold ${trend.up ? 'text-green-500' : 'text-red-400'}`}>{trend.text}</p>}
       </div>
     </div>
   );
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col lg:flex-row h-full">
       {/* Main feed */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      <div className="flex-1 p-4 md:p-6 overflow-y-auto min-w-0">
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Historial</p>
-
-        {/* Date range */}
         <p className="text-sm text-gray-500 mb-4">01 – 31 {dayjs().format('MMMM, YYYY')}</p>
 
         {/* Bar chart */}
@@ -92,8 +89,7 @@ export default function Historial() {
                 contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 12 }}
                 formatter={(v: any) => [`${v} créditos`, '']}
               />
-              <Bar dataKey="value" fill="#009ADB" radius={[4, 4, 0, 0]}
-                label={false} />
+              <Bar dataKey="value" fill="#009ADB" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -117,11 +113,9 @@ export default function Historial() {
                   <TypeIcon tipo={m.tipo} i={i} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-800 truncate">{m.descripcion || 'Movimiento de créditos'}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {dayjs(m.fecha).format('h:mm a')}
-                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">{dayjs(m.fecha).format('h:mm a')}</p>
                   </div>
-                  <span className={`text-sm font-black ${
+                  <span className={`text-sm font-black flex-shrink-0 ${
                     m.tipo === 'GANANCIA' || m.tipo === 'ASIGNACION_INICIAL' ? 'text-gray-900' : 'text-red-500'
                   }`}>
                     {m.tipo === 'GANANCIA' || m.tipo === 'ASIGNACION_INICIAL' ? '+' : '-'} {m.cantidad}
@@ -134,7 +128,7 @@ export default function Historial() {
       </div>
 
       {/* Right stats */}
-      <div className="w-72 border-l border-gray-100 p-5 flex-shrink-0 overflow-y-auto">
+      <div className="lg:w-72 lg:border-l border-t lg:border-t-0 border-gray-100 p-4 md:p-5 lg:flex-shrink-0 lg:overflow-y-auto">
         <StatItem icon="🤝" label="Total de intercambios" value={historial.length} />
         <StatItem icon="➕" label="Créditos ganados" value={ganados} trend={{ up: true, text: '↑ 16% este mes' }} />
         <StatItem icon="➖" label="Créditos gastados" value={gastados} trend={{ up: false, text: '↓ 1% este mes' }} />
