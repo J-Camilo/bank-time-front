@@ -20,11 +20,11 @@ const AppLayout = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-start justify-center p-4">
-      <div className="w-full max-w-[1280px] bg-white rounded-2xl shadow-card overflow-hidden flex flex-col"
+      <div className="w-full max-w-[1280px] bg-white rounded-2xl shadow-card overflow-hidden flex"
         style={{ minHeight: 'calc(100vh - 32px)' }}>
-        <TopBar />
-        <div className="flex flex-1 overflow-hidden">
-          <Nav />
+        <Nav />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <TopBar />
           <main className="flex-1 overflow-y-auto bg-white">
             <Outlet />
           </main>

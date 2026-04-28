@@ -40,8 +40,8 @@ export default function Dashboard() {
   const totalPages = Math.ceil(pubs.length / PER_PAGE);
 
   const StatCard = ({ value, label, sub, dark }: { value: number; label: string; sub: string; dark?: boolean }) => (
-    <motion.div whileHover={{ y: -2 }}
-      className={`rounded-2xl p-5 flex items-start justify-between ${dark ? 'bg-navy text-white' : 'bg-white border border-gray-100'}`}>
+    <motion.div whileHover={{ y: -3 }}
+      className={`rounded-2xl p-5 flex items-start justify-between ${dark ? 'card-3d-dark' : 'card-3d'}`}>
       <div>
         <p className={`text-xs font-medium mb-1 ${dark ? 'text-white/60' : 'text-gray-400'}`}>{label}</p>
         <p className={`text-4xl font-black ${dark ? 'text-white' : 'text-gray-900'}`}>{value}</p>
@@ -79,7 +79,7 @@ export default function Dashboard() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="card-3d overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

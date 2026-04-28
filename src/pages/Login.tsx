@@ -6,6 +6,17 @@ import { authService } from '../services/auth';
 import { setCredentials } from '../store/slices/authSlice';
 import { useToast } from '../components/ui/Toast';
 
+const WAVE_NAVY = [
+  'M0,0 L110,0 C280,250 -60,750 110,1000 L0,1000 Z',
+  'M0,0 L110,0 C-60,250 280,750 110,1000 L0,1000 Z',
+  'M0,0 L110,0 C280,250 -60,750 110,1000 L0,1000 Z',
+];
+const WAVE_WHITE = [
+  'M110,0 C280,250 -60,750 110,1000 L220,1000 L220,0 Z',
+  'M110,0 C-60,250 280,750 110,1000 L220,1000 L220,0 Z',
+  'M110,0 C280,250 -60,750 110,1000 L220,1000 L220,0 Z',
+];
+
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -29,76 +40,79 @@ export default function Login() {
     }
   };
 
+  const wave = { duration: 7, repeat: Infinity, ease: 'easeInOut' as const };
+
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center overflow-hidden">
-      {/* Full-page split layout */}
-      <div className="w-full max-w-4xl h-[520px] flex rounded-2xl overflow-hidden shadow-2xl mx-4">
+    <div className="h-screen bg-white relative flex overflow-hidden">
+      {/* Navy left background */}
+      <div className="flex-shrink-0 bg-navy" style={{ width: '40%' }} />
 
-        {/* Left: dark organic blob area */}
-        <div className="relative w-2/5 bg-navy flex-shrink-0 overflow-hidden">
-          {/* Organic blob shapes */}
-          <motion.div
-            animate={{ scale: [1, 1.06, 1], rotate: [0, 3, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute -bottom-16 -right-12 w-72 h-72 rounded-full"
-            style={{ background: 'rgba(0,177,252,0.15)' }}
-          />
-          <motion.div
-            animate={{ scale: [1, 1.08, 1] }}
-            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-            className="absolute -top-20 -left-10 w-80 h-80 rounded-full"
-            style={{ background: 'rgba(0,130,186,0.2)' }}
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-white text-center px-8">
-              <p className="text-4xl font-black tracking-tight mb-2">BOTIme.</p>
-              <p className="text-sm text-white/60">Banco de Tiempo</p>
-            </div>
+      {/* S-wave SVG animada */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ position: 'absolute', top: 0, left: 'calc(40% - 110px)', width: '220px', height: '100%' }}
+        viewBox="0 0 220 1000"
+        preserveAspectRatio="none"
+      >
+        <motion.path
+          d={WAVE_NAVY[0]}
+          animate={{ d: WAVE_NAVY }}
+          transition={wave}
+          fill="#003B54"
+        />
+        <motion.path
+          d={WAVE_WHITE[0]}
+          animate={{ d: WAVE_WHITE }}
+          transition={wave}
+          fill="white"
+        />
+      </svg>
+
+      {/* Right: form area */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="flex-1 flex items-center justify-center py-10"
+        style={{ paddingLeft: '120px', paddingRight: '10%' }}
+      >
+        <form onSubmit={submit} className="w-full max-w-sm">
+          <div className="space-y-4 mb-6">
+            <input
+              className="input-field"
+              type="email"
+              placeholder="Ingresar nombre de usuario"
+              value={correo}
+              onChange={e => setCorreo(e.target.value)}
+              required
+            />
+            <input
+              className="input-field"
+              type="password"
+              placeholder="Ingresar contraseña"
+              value={contrasena}
+              onChange={e => setContrasena(e.target.value)}
+              required
+            />
           </div>
-        </div>
 
-        {/* Right: form */}
-        <div className="flex-1 bg-white flex flex-col items-center justify-center px-10">
-          <motion.form
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-            onSubmit={submit}
-            className="w-full max-w-xs"
-          >
-            <div className="space-y-3 mb-5">
-              <input
-                className="input-field"
-                type="email"
-                placeholder="Ingresar nombre de usuario"
-                value={correo}
-                onChange={e => setCorreo(e.target.value)}
-                required
-              />
-              <input
-                className="input-field"
-                type="password"
-                placeholder="Ingresar contraseña"
-                value={contrasena}
-                onChange={e => setContrasena(e.target.value)}
-                required
-              />
-            </div>
+          <button type="submit" disabled={loading} className="btn-primary w-full justify-center mb-5">
+            {loading ? 'Cargando...' : 'Iniciar sesión'}
+          </button>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full justify-center text-center mb-3">
-              {loading ? 'Cargando...' : 'Iniciar sesión'}
-            </button>
-
-            <div className="text-center space-y-1">
-              <p className="text-sm text-sky-mid cursor-pointer hover:underline">¿Olvidaste tu contraseña?</p>
-              <p className="text-sm text-gray-600">
-                ¿Aún no tienes cuenta?{' '}
-                <Link to="/register" className="text-navy font-semibold hover:underline">Regístrate aquí</Link>
-              </p>
-            </div>
-          </motion.form>
-        </div>
-      </div>
+          <div className="text-center space-y-2">
+            <p className="text-sm text-sky-mid cursor-pointer hover:underline">
+              ¿Olvidaste tu contraseña?
+            </p>
+            <p className="text-sm text-gray-600">
+              ¿Aún no tienes cuenta?{' '}
+              <Link to="/register" className="text-navy font-semibold hover:underline">
+                Regístrate aquí
+              </Link>
+            </p>
+          </div>
+        </form>
+      </motion.div>
     </div>
   );
 }
