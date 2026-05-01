@@ -111,8 +111,20 @@ const TopBar = ({ onMenuClick }: TopBarProps) => {
                 className="absolute right-0 w-72 md:w-80 bg-white rounded-2xl overflow-hidden z-50"
                 style={{ boxShadow: 'var(--shadow-focus)', top: '3.25rem' }}
               >
-                <div className="px-4 py-3 border-b border-gray-100">
+                <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                   <span className="text-sm font-semibold text-gray-900">Notificaciones</span>
+                  {unread > 0 && (
+                    <button
+                      onClick={async () => {
+                        await notificacionesService.marcarTodasLeidas().catch(() => {});
+                        setNotifs(p => p.map(x => ({ ...x, leida: true })));
+                        setUnread(0);
+                      }}
+                      className="text-xs text-sky-mid hover:underline font-medium"
+                    >
+                      Marcar todas
+                    </button>
+                  )}
                 </div>
                 <div className="max-h-72 overflow-y-auto">
                   {notifs.length === 0 ? (

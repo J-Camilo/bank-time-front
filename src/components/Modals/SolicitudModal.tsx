@@ -20,7 +20,10 @@ export const SolicitudModal = ({ pub, open, onClose, onSuccess }: Props) => {
     if (!pub) return;
     setLoading(true);
     try {
-      const fechaHora = hora ? `${fecha}T${ampm === 'PM' && parseInt(hora) < 12 ? parseInt(hora) + 12 : hora}:${minuto || '00'}:00` : undefined;
+      let h24 = parseInt(hora);
+      if (ampm === 'PM' && h24 !== 12) h24 += 12;
+      if (ampm === 'AM' && h24 === 12) h24 = 0;
+      const fechaHora = hora ? `${fecha}T${String(h24).padStart(2, '0')}:${(minuto || '00').padStart(2, '0')}:00` : undefined;
       await solicitudesService.crear({ publicacion_id: pub.id, fecha_propuesta: fechaHora });
       show('¡Solicitud enviada correctamente!');
       onSuccess?.(); onClose();
@@ -48,7 +51,7 @@ export const SolicitudModal = ({ pub, open, onClose, onSuccess }: Props) => {
         </p>
 
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 text-sm text-gray-500"><Clock size={14} /> 1 hora</span>
+          <span className="flex items-center gap-1.5 text-sm text-gray-500"><Clock size={14} /> {pub.creditos_hora} {pub.creditos_hora === 1 ? 'hora' : 'horas'}</span>
           <span className="flex items-center gap-1.5 text-sm text-gray-500">
             <div className="w-5 h-5 rounded-full bg-sky-mid flex items-center justify-center">
               <Star size={9} className="text-white fill-white" />

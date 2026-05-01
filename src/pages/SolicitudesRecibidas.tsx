@@ -102,12 +102,14 @@ export default function SolicitudesRecibidas() {
 
             <div className="flex items-center gap-6 mb-4">
               <span className="flex items-center gap-2 text-sm text-gray-500"><Clock size={14} /> 1 hora</span>
-              <span className="flex items-center gap-2 text-sm text-gray-500">
-                <div className="w-5 h-5 rounded-full bg-sky-mid flex items-center justify-center">
-                  <span className="text-white text-[9px] font-bold">2</span>
-                </div>
-                Créditos
-              </span>
+              {sel.creditos_acordados != null && (
+                <span className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="w-5 h-5 rounded-full bg-sky-mid flex items-center justify-center">
+                    <span className="text-white text-[9px] font-bold">{sel.creditos_acordados}</span>
+                  </div>
+                  Créditos
+                </span>
+              )}
             </div>
 
             <div className="mb-6">
@@ -125,7 +127,7 @@ export default function SolicitudesRecibidas() {
                 <div className="border border-gray-200 rounded-xl px-4 py-2 text-sm font-semibold text-gray-700">
                   {dayjs(sel.fecha_propuesta || sel.fecha_solicitud).format('HH : mm')}
                 </div>
-                <span className="text-sm text-gray-500">AM</span>
+                <span className="text-sm text-gray-500">{dayjs(sel.fecha_propuesta || sel.fecha_solicitud).format('A')}</span>
               </div>
             </div>
 

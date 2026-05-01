@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 dayjs.locale('es');
 
-const HOURS = Array.from({ length: 23 }, (_, i) => i + 1);
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 const STATUS_STYLE: Record<string, { bg: string; text: string; ribbon: string }> = {
   EN_ESPERA:  { bg: 'bg-white border border-gray-200', text: 'text-gray-900', ribbon: 'bg-orange-400' },
@@ -121,7 +121,7 @@ export default function Intercambios() {
         <div className="flex-1 overflow-y-auto">
           <div className="relative">
             {HOURS.map(h => {
-              const label = h <= 12 ? `${h} AM` : `${h - 12} PM`;
+              const label = h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`;
               const slotIntercambios = dayIntercambios.filter(i => dayjs(i.fecha_acordada).hour() === h);
               return (
                 <div key={h} className="flex items-start gap-3 min-h-[52px] border-b border-gray-50">

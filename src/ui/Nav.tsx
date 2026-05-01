@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Landmark, X } from 'lucide-react';
+import { Landmark, X, ShieldCheck } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../store';
 
 interface NavItemProps {
   to: string;
@@ -35,6 +37,7 @@ interface NavProps {
 
 const Nav = ({ onClose }: NavProps) => {
   const { pathname } = useLocation();
+  const user = useSelector((s: RootState) => s.auth.user);
   const inSolicitudes = pathname.startsWith('/solicitudes');
 
   return (
@@ -75,6 +78,23 @@ const Nav = ({ onClose }: NavProps) => {
 
         <NavItem to="/intercambios" label="Intercambio" onClose={onClose} />
         <NavItem to="/historial" label="Historial" onClose={onClose} />
+
+        {user?.es_admin && (
+          <div className="pt-2 mt-2 border-t border-gray-100">
+            <Link
+              to="/admin"
+              onClick={onClose}
+              className={`flex items-center gap-2 py-2 pl-3 text-sm font-semibold transition-colors duration-150 border-l-2 ${
+                pathname === '/admin'
+                  ? 'text-navy border-navy'
+                  : 'text-gray-500 hover:text-navy border-transparent'
+              }`}
+            >
+              <ShieldCheck size={14} />
+              Administración
+            </Link>
+          </div>
+        )}
       </nav>
     </aside>
   );

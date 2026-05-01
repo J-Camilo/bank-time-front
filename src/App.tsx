@@ -13,6 +13,13 @@ import SolicitudesRecibidas  from './pages/SolicitudesRecibidas';
 import Intercambios from './pages/Intercambios';
 import Historial   from './pages/Historial';
 import Perfil      from './pages/Perfil';
+import Admin       from './pages/Admin';
+
+const AdminGuard = () => {
+  const user = useSelector((s: RootState) => s.auth.user);
+  if (!user?.es_admin) return <Navigate to="/dashboard" replace />;
+  return <Outlet />;
+};
 
 const AppLayout = () => {
   const user = useSelector((s: RootState) => s.auth.user);
@@ -67,6 +74,9 @@ export default function App() {
           <Route path="/intercambios"           element={<Intercambios />} />
           <Route path="/historial"              element={<Historial />} />
           <Route path="/perfil"                 element={<Perfil />} />
+          <Route element={<AdminGuard />}>
+            <Route path="/admin"              element={<Admin />} />
+          </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

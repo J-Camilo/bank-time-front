@@ -33,7 +33,7 @@ export const ConfirmarModal = ({ intercambio: i, open, onClose, onSuccess }: Pro
           Lorem Ipsum is simply dummy text of the printing and typesetting industry.
         </p>
         <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
-          <span className="flex items-center gap-1.5"><Clock size={14} /> 1 hora</span>
+          <span className="flex items-center gap-1.5"><Clock size={14} /> {i.creditos_acordados} {i.creditos_acordados === 1 ? 'hora' : 'horas'}</span>
           <span className="flex items-center gap-1.5">
             <div className="w-5 h-5 rounded-full bg-sky-mid text-white text-[9px] flex items-center justify-center font-bold">
               {i.creditos_acordados}
@@ -54,7 +54,7 @@ export const ConfirmarModal = ({ intercambio: i, open, onClose, onSuccess }: Pro
           </div>
           <div>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Hora</p>
-            <p className="text-sm text-gray-700">{dayjs(i.fecha_acordada).format('HH : mm')} AM</p>
+            <p className="text-sm text-gray-700">{dayjs(i.fecha_acordada).format('hh:mm A')}</p>
           </div>
           <div>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Confirma servicio</p>

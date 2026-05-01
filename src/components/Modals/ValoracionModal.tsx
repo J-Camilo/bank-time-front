@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Star } from 'lucide-react';
 import Modal from '../ui/Modal';
-import api from '../../config/axiosGlobal';
+import { valoracionesService } from '../../services/valoraciones';
 import { useToast } from '../ui/Toast';
 
 interface Props { intercambioId: number | null; open: boolean; onClose: () => void; onSuccess?: () => void; }
@@ -17,7 +17,7 @@ export const ValoracionModal = ({ intercambioId, open, onClose, onSuccess }: Pro
     if (!intercambioId || stars === 0) { show('Selecciona una calificación', 'error'); return; }
     setLoading(true);
     try {
-      await api.post('/valoraciones', { intercambio_id: intercambioId, calificacion: stars, comentario });
+      await valoracionesService.crear(intercambioId, stars, comentario);
       show('¡Valoración enviada!');
       setStars(0); setComentario('');
       onSuccess?.(); onClose();
