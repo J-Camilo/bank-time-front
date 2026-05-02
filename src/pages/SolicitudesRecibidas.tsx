@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Clock, User, ArrowLeft } from 'lucide-react';
+import { CheckCircleOutlined, CloseCircleOutlined, StopOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { solicitudesService } from '../services/solicitudes';
 import { useToast } from '../components/ui/Toast';
@@ -78,7 +79,7 @@ export default function SolicitudesRecibidas() {
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Solicitudes pendientes</p>
         {loading ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-24 bg-gray-100 rounded-2xl mb-3 animate-pulse" />)
           : list.length === 0 ? <p className="text-sm text-gray-400 text-center mt-8">Sin solicitudes pendientes</p>
-          : list.map(s => <SolicitudCard key={s.id} s={s} />)
+          : list.filter(s => s.estado === 'PENDIENTE').map(s => <SolicitudCard key={s.id} s={s} />)
         }
       </div>
 
@@ -134,7 +135,12 @@ export default function SolicitudesRecibidas() {
 
             <div className="mb-8">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Estado de la solicitud</p>
-              <p className="text-sm text-gray-700">Pendiente por su aceptación</p>
+              <p className="text-sm text-gray-700">
+                {sel.estado === 'PENDIENTE' ? 'Pendiente por su aceptación' :
+                 sel.estado === 'ACEPTADA'  ? <span className="flex items-center gap-1.5 text-green-600"><CheckCircleOutlined /> Solicitud aceptada</span> :
+                 sel.estado === 'RECHAZADA' ? <span className="flex items-center gap-1.5 text-red-500"><CloseCircleOutlined /> Solicitud rechazada</span> :
+                                              <span className="flex items-center gap-1.5 text-gray-400"><StopOutlined /> Solicitud cancelada</span>}
+              </p>
             </div>
 
             {sel.estado === 'PENDIENTE' && (
