@@ -1,23 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "mcp__plugin_engram_engram__mem_search",
-      "Bash(curl -s -X POST http://localhost:3005/api/v1/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"correo\\\\\":\\\\\"testbug@test.com\\\\\",\\\\\"contrasena\\\\\":\\\\\"Test1234!\\\\\"}\")",
-      "Bash(curl -s http://localhost:3005/api/v1/usuarios/me -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU')",
-      "Bash(curl -s http://localhost:3005/api/v1/categorias -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU')",
-      "Bash(curl -s http://localhost:3005/api/v1/publicaciones -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU')",
-      "Bash(curl -s http://localhost:3005/api/v1/publicaciones/mis -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU')",
-      "Bash(curl -s http://localhost:3005/api/v1/notificaciones -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU')",
-      "Bash(curl -s -X POST http://localhost:3005/api/v1/publicaciones -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU' -H 'Content-Type: application/json' -d '{\"titulo\":\"Test Service\",\"descripcion\":\"A test service description that is long enough\",\"categoria_id\":1,\"creditos_hora\":2,\"fecha_expiracion\":\"2026-06-30\"}')",
-      "Bash(curl -s -X POST http://localhost:3005/api/v1/valoraciones -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU' -H 'Content-Type: application/json' -d '{\"intercambio_id\":1,\"calificacion\":5,\"comentario\":\"Excelente servicio\"}')",
-      "Bash(curl -s http://localhost:3005/api/v1/valoraciones/usuario/2 -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU')",
-      "Bash(curl -s -X PATCH http://localhost:3005/api/v1/notificaciones/leer-todas -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU')",
-      "Bash(curl -s http://localhost:3005/api/v1/admin/usuarios -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU')",
-      "Bash(curl -s -X POST http://localhost:3005/api/v1/solicitudes -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU' -H 'Content-Type: application/json' -d '{\"publicacion_id\":3,\"horas_solicitadas\":1,\"mensaje\":\"Hola, me interesa el servicio\"}')",
-      "Bash(curl -s http://localhost:3005/api/v1/publicaciones/19/matches -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU')",
-      "Bash(curl -s http://localhost:3005/api/v1/solicitudes/enviadas -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU')",
-      "Bash(curl -s \"http://localhost:3005/api/v1/publicaciones?page=0\")",
-      "Bash(curl -s -X POST http://localhost:3005/api/v1/publicaciones -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiZXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3Nzc2NjAxMDEsImV4cCI6MTc3NzY2MTAwMX0.IWK8CiCTy2ZQno4kuw6ZGBbrkpoIbZ3vSo1IUqrHAkU\" -H \"Content-Type: application/json\" -d \"{\\\\\"titulo\\\\\":\\\\\"Sin Categoria Test\\\\\",\\\\\"descripcion\\\\\":\\\\\"descripcion de prueba\\\\\",\\\\\"creditos_hora\\\\\":1,\\\\\"fecha_expiracion\\\\\":\\\\\"2026-06-30\\\\\"}\")"
+      "Read(//c/Users/juanc/Desktop/universidad/proyectos/banco-tiempo-api/src/controllers/**)",
+      "Read(//c/Users/juanc/Desktop/universidad/proyectos/banco-tiempo-api/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\juanc\\Desktop\\universidad\\proyectos\\banco-tiempo-api\\src\\config",
+      "c:\\Users\\juanc\\Desktop\\universidad\\proyectos\\banco-tiempo-api\\src\\services",
+      "c:\\Users\\juanc\\Desktop\\universidad\\proyectos\\banco-tiempo-api\\src\\controllers",
+      "c:\\Users\\juanc\\Desktop\\universidad\\proyectos\\banco-tiempo-api\\src\\routes"
     ]
   }
 }

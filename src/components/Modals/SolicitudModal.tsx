@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Clock, Star } from 'lucide-react';
 import Modal from '../ui/Modal';
 import { solicitudesService } from '../../services/solicitudes';
@@ -16,6 +16,13 @@ export const SolicitudModal = ({ pub, open, onClose, onSuccess }: Props) => {
   const [minuto, setMinuto]   = useState('');
   const [ampm, setAmpm]       = useState('AM');
 
+  useEffect(() => {
+    setFecha(dayjs().format('YYYY-MM-DD'));
+    setHora('');
+    setMinuto('');
+    setAmpm('AM');
+  }, [pub?.id]);
+
   const solicitar = async () => {
     if (!pub) return;
     setLoading(true);
@@ -23,7 +30,7 @@ export const SolicitudModal = ({ pub, open, onClose, onSuccess }: Props) => {
       let h24 = parseInt(hora);
       if (ampm === 'PM' && h24 !== 12) h24 += 12;
       if (ampm === 'AM' && h24 === 12) h24 = 0;
-      const fechaHora = hora ? `${fecha}T${String(h24).padStart(2, '0')}:${(minuto || '00').padStart(2, '0')}:00` : undefined;
+      const fechaHora = hora ? dayjs(`${fecha}T${String(h24).padStart(2, '0')}:${(minuto || '00').padStart(2, '0')}:00`).toISOString() : undefined;
       await solicitudesService.crear({ publicacion_id: pub.id, fecha_propuesta: fechaHora });
       show('¡Solicitud enviada correctamente!');
       onSuccess?.(); onClose();
@@ -39,7 +46,7 @@ export const SolicitudModal = ({ pub, open, onClose, onSuccess }: Props) => {
       <div className="space-y-4">
         {/* Service info */}
         <div>
-          <p className="text-xs text-gray-400 mb-0.5">Este servicio caduca {dayjs(pub.fecha_expiracion).format('DD/MM/YYYY')}</p>
+          <p className="text-xs text-gray-400 mb-0.5">Este servicio caduca {dayjs(pub.fecha_expiracion.substring(0, 10)).format('DD/MM/YYYY')}</p>
           <div className="flex items-start justify-between">
             <h2 className="text-2xl font-black text-gray-900 leading-tight">{pub.titulo}</h2>
             <span className="text-sm text-gray-400 flex-shrink-0 ml-3">{pub.nombre} {pub.apellido}</span>
