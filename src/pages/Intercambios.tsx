@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Clock, ChevronLeft, ChevronRight, Check, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { intercambiosService } from '../services/intercambios';
@@ -25,9 +25,11 @@ export default function Intercambios() {
   const [loading, setLoading]           = useState(true);
   const [selectedDay, setSelectedDay]   = useState(dayjs());
   const [showCalendar, setShowCalendar] = useState(false);
-  const [confirmar, setConfirmar]       = useState<{ open: boolean; item: any }>({ open: false, item: null });
+  const [confirmar, setConfirmar]       = useState<{ open: boolean; item: any; readonly?: boolean }>({ open: false, item: null });
   const [valoracion, setValoracion]     = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
   const [cancelar, setCancelar]         = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
+  const [selectedId, setSelectedId]     = useState<number | null>(null);
+  const calendarScrollRef               = useRef<HTMLDivElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -40,22 +42,36 @@ export default function Intercambios() {
   const dayIntercambios = intercambios.filter(i => dayjs(i.fecha_acordada).isSame(selectedDay, 'day'));
 
   const IntercambioCard = ({ i }: { i: any }) => {
-    const s = STATUS_STYLE[i.estado] || STATUS_STYLE.EN_ESPERA;
+    const active = selectedId === i.id;
+    const s = active ? { bg: 'bg-navy', text: 'text-white', ribbon: 'bg-sky-mid' }
+                     : (STATUS_STYLE[i.estado] || STATUS_STYLE.EN_ESPERA);
     const label = i.estado.replace('_', ' ');
     return (
       <div
-        className={`${s.bg} rounded-2xl p-4 mb-3 relative overflow-hidden cursor-pointer`}
-        onClick={() => setShowCalendar(true)}
+        className={`${s.bg} rounded-2xl p-4 mb-3 relative overflow-hidden cursor-pointer transition-colors`}
+        onClick={() => {
+          setSelectedId(i.id);
+          setSelectedDay(dayjs(i.fecha_acordada));
+          setShowCalendar(true);
+          const hour = dayjs(i.fecha_acordada).hour();
+          setTimeout(() => {
+            const SLOT_H = 52;
+            calendarScrollRef.current?.scrollTo({
+              top: Math.max(0, hour * SLOT_H - 120),
+              behavior: 'smooth',
+            });
+          }, 80);
+        }}
       >
         <span className={`absolute top-3 right-3 ${s.ribbon} text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full`}>
           {label}
         </span>
-        <p className={`text-xs mb-1.5 ${i.estado === 'EN_CURSO' ? 'text-white/50' : 'text-gray-400'}`}>
+        <p className={`text-xs mb-1.5 ${active || i.estado === 'EN_CURSO' ? 'text-white/50' : 'text-gray-400'}`}>
           Fecha acordada {dayjs(i.fecha_acordada).format('DD/MM/YYYY')}
         </p>
         <h3 className={`font-bold text-base leading-snug mb-2 pr-16 ${s.text}`}>{i.publicacion_titulo}</h3>
         <div className="flex items-center justify-between">
-          <span className={`flex items-center gap-1 text-xs ${i.estado === 'EN_CURSO' ? 'text-white/60' : 'text-gray-400'}`}>
+          <span className={`flex items-center gap-1 text-xs ${active || i.estado === 'EN_CURSO' ? 'text-white/60' : 'text-gray-400'}`}>
             <Clock size={11} /> {i.creditos_acordados} hora{i.creditos_acordados > 1 ? 's' : ''}
           </span>
           {i.estado === 'EN_CURSO' && (
@@ -67,12 +83,19 @@ export default function Intercambios() {
             </button>
           )}
           {i.estado === 'COMPLETADO' && (
-            <button
-              onClick={e => { e.stopPropagation(); setValoracion({ open: true, id: i.id }); }}
-              className="text-xs text-sky-mid hover:underline font-semibold"
-            >
-              Ver info
-            </button>
+            i.ya_valore
+              ? <button
+                  onClick={e => { e.stopPropagation(); setConfirmar({ open: true, item: i, readonly: true }); }}
+                  className="text-xs text-gray-400 hover:underline font-semibold"
+                >
+                  Ver info
+                </button>
+              : <button
+                  onClick={e => { e.stopPropagation(); setValoracion({ open: true, id: i.id }); }}
+                  className="text-xs text-sky-mid hover:underline font-semibold"
+                >
+                  Valorar
+                </button>
           )}
         </div>
       </div>
@@ -118,7 +141,7 @@ export default function Intercambios() {
         </div>
 
         {/* Time slots */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={calendarScrollRef} className="flex-1 overflow-y-auto">
           <div className="relative">
             {HOURS.map(h => {
               const label = h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`;
@@ -146,7 +169,8 @@ export default function Intercambios() {
       </div>
 
       <ConfirmarModal intercambio={confirmar.item} open={confirmar.open}
-        onClose={() => setConfirmar({ open: false, item: null })} onSuccess={load} />
+        onClose={() => setConfirmar({ open: false, item: null })} onSuccess={load}
+        readonly={confirmar.readonly} />
       <ValoracionModal intercambioId={valoracion.id} open={valoracion.open}
         onClose={() => setValoracion({ open: false, id: null })} onSuccess={load} />
       <CancelacionModal intercambioId={cancelar.id} open={cancelar.open}
