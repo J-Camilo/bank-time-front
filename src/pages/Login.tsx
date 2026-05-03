@@ -67,7 +67,7 @@ export default function Login() {
               {loading ? 'Cargando...' : 'Iniciar sesión'}
             </button>
             <div className="text-center space-y-2">
-              <p className="text-sm text-sky-mid cursor-pointer hover:underline">¿Olvidaste tu contraseña?</p>
+              {/* <p className="text-sm text-sky-mid cursor-pointer hover:underline">¿Olvidaste tu contraseña?</p> */}
               <p className="text-sm text-gray-600">
                 ¿Aún no tienes cuenta?{' '}
                 <Link to="/register" className="text-navy font-semibold hover:underline">Regístrate aquí</Link>
