@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
+import Select from '../ui/Select';
 import { publicacionesService } from '../../services/publicaciones';
 import { categoriasService } from '../../services/categorias';
 import { useToast } from '../ui/Toast';
@@ -28,16 +29,18 @@ const SpinInput = ({ label, value, min = 1, max = 99, onChange }: {
   </div>
 );
 
+const EMPTY = {
+  titulo: '', creditos: 1, horas: 1, fecha_expiracion: '',
+  descripcion: '', ubicacion: '', direccion: '', categoria_id: '',
+};
+
 export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) => {
   const { show } = useToast();
-  const [loading, setLoading]       = useState(false);
-  const [_categorias, setCategorias] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [categorias, setCategorias] = useState<any[]>([]);
   const isEdit = !!pub;
 
-  const [f, setF] = useState({
-    titulo: '', creditos: 1, horas: 1,
-    fecha_expiracion: '', descripcion: '', ubicacion: '', direccion: '', categoria_id: '',
-  });
+  const [f, setF] = useState(EMPTY);
   const up = (k: string, v: any) => setF(p => ({ ...p, [k]: v }));
 
   useEffect(() => {
@@ -50,27 +53,28 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
         titulo:           pub.titulo || '',
         creditos:         pub.creditos_hora || 1,
         horas:            1,
-        fecha_expiracion: pub.fecha_expiracion ? dayjs(pub.fecha_expiracion).format('YYYY-MM-DD') : '',
+        fecha_expiracion: pub.fecha_expiracion ? pub.fecha_expiracion.substring(0, 10) : '',
         descripcion:      pub.descripcion || '',
         ubicacion:        pub.municipio || '',
         direccion:        pub.direccion || '',
-        categoria_id:     pub.categoria_id || '',
+        categoria_id:     pub.categoria_id ? String(pub.categoria_id) : '',
       });
     } else if (!open) {
-      setF({ titulo: '', creditos: 1, horas: 1, fecha_expiracion: '', descripcion: '', ubicacion: '', direccion: '', categoria_id: '' });
+      setF(EMPTY);
     }
   }, [pub, open]);
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!f.categoria_id) { show('Seleccioná una categoría', 'error'); return; }
     setLoading(true);
     try {
-      const payload = {
+      const payload: any = {
         titulo:           f.titulo,
         descripcion:      f.descripcion,
         creditos_hora:    f.creditos,
-        fecha_expiracion: dayjs(f.fecha_expiracion).format('YYYY-MM-DD'),
-        categoria_id:     f.categoria_id ? parseInt(f.categoria_id) : undefined,
+        fecha_expiracion: f.fecha_expiracion,
+        categoria_id:     parseInt(f.categoria_id),
       };
       if (isEdit) {
         await publicacionesService.actualizar(pub.id, payload);
@@ -96,6 +100,8 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
     }
   };
 
+  const catOptions = categorias.map(c => ({ value: String(c.id), label: c.nombre }));
+
   return (
     <Modal
       open={open}
@@ -104,6 +110,14 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
       maxWidth="max-w-2xl"
     >
       <form onSubmit={save} className="space-y-5">
+
+        {/* Estado automático */}
+        <div className="flex items-start gap-3 rounded-2xl bg-sky-50 border border-sky-200 px-4 py-3">
+          <span className="text-sky-500 mt-0.5 text-base">ℹ️</span>
+          <p className="text-xs text-sky-700 leading-relaxed">
+            El estado de la publicación siempre estará <strong>activa</strong> hasta que llegue la fecha de expiración. Este proceso es automático.
+          </p>
+        </div>
 
         {/* Título + fecha creación */}
         <div>
@@ -116,7 +130,7 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
             )}
           </div>
           <input
-            className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all"
+            className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all bg-white"
             style={{ boxShadow: 'var(--shadow-ui)' }}
             value={f.titulo}
             onChange={e => up('titulo', e.target.value)}
@@ -125,8 +139,19 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
           />
         </div>
 
-        {/* Créditos · Horas · Fecha · Estado */}
-        <div className="grid grid-cols-4 gap-3">
+        {/* Categoría */}
+        <div>
+          <label className="text-xs font-medium text-gray-400 mb-1.5 block">Categoría</label>
+          <Select
+            value={f.categoria_id}
+            onChange={v => up('categoria_id', v)}
+            options={catOptions}
+            placeholder="Selecciona una categoría"
+          />
+        </div>
+
+        {/* Créditos · Horas · Fecha */}
+        <div className="grid grid-cols-3 gap-3">
           <SpinInput label="Créditos" value={f.creditos} max={24} onChange={v => up('creditos', v)} />
           <SpinInput label="Horas propuesta" value={f.horas} onChange={v => up('horas', v)} />
 
@@ -142,51 +167,19 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
               required
             />
           </div>
-
-          <div>
-            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Estado</label>
-            <div
-              className="w-full rounded-2xl py-3 flex items-center justify-center font-bold text-sm text-white tracking-wider"
-              style={{ background: 'linear-gradient(135deg, #003B54, #009ADB)', boxShadow: 'var(--shadow-dark)' }}
-            >
-              ACTIVO
-            </div>
-          </div>
         </div>
 
-        {/* Descripción + Ubicación */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2">
-            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Descripción de la publicación</label>
-            <textarea
-              className="w-full rounded-2xl px-4 py-3 text-sm text-gray-800 placeholder-gray-300 resize-none focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all bg-white"
-              style={{ boxShadow: 'var(--shadow-ui)' }}
-              rows={5}
-              value={f.descripcion}
-              onChange={e => up('descripcion', e.target.value)}
-              placeholder="Describe el servicio..."
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Ubicación</label>
-            <div className="space-y-2.5">
-              <input
-                className="w-full rounded-2xl px-4 py-3 text-sm font-semibold text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all bg-white uppercase tracking-wide"
-                style={{ boxShadow: 'var(--shadow-ui)' }}
-                value={f.ubicacion}
-                onChange={e => up('ubicacion', e.target.value)}
-                placeholder="MEDELLÍN"
-              />
-              <input
-                className="w-full rounded-2xl px-4 py-3 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all bg-white"
-                style={{ boxShadow: 'var(--shadow-ui)' }}
-                value={f.direccion}
-                onChange={e => up('direccion', e.target.value)}
-                placeholder="CRA 89 #102 B09"
-              />
-            </div>
-          </div>
+        {/* Descripción */}
+        <div>
+          <label className="text-xs font-medium text-gray-400 mb-1.5 block">Descripción de la publicación</label>
+          <textarea
+            className="w-full rounded-2xl px-4 py-3 text-sm text-gray-800 placeholder-gray-300 resize-none focus:outline-none focus:ring-2 focus:ring-navy/15 transition-all bg-white"
+            style={{ boxShadow: 'var(--shadow-ui)' }}
+            rows={5}
+            value={f.descripcion}
+            onChange={e => up('descripcion', e.target.value)}
+            placeholder="Describe el servicio..."
+          />
         </div>
 
         {/* Acciones */}

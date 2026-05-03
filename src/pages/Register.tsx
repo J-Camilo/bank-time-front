@@ -7,11 +7,38 @@ import { useToast } from '../components/ui/Toast';
 import Select from '../components/ui/Select';
 
 const DEPS: Record<string, string[]> = {
-  Antioquia: ['Medellín', 'Bello', 'Itagüí', 'Envigado', 'Rionegro'],
-  Cundinamarca: ['Bogotá', 'Soacha', 'Zipaquirá', 'Facatativá'],
-  'Valle del Cauca': ['Cali', 'Palmira', 'Buenaventura'],
-  Atlántico: ['Barranquilla', 'Soledad', 'Malambo'],
-  Bolívar: ['Cartagena', 'Magangué', 'Turbaco'],
+  Amazonas: ['Leticia', 'Puerto Nariño', 'La Chorrera', 'Tarapacá'],
+  Antioquia: ['Medellín', 'Bello', 'Itagüí', 'Envigado', 'Rionegro', 'Apartadó', 'Turbo', 'Caucasia', 'Sabaneta', 'La Estrella'],
+  Arauca: ['Arauca', 'Saravena', 'Tame', 'Fortul', 'Arauquita'],
+  Atlántico: ['Barranquilla', 'Soledad', 'Malambo', 'Sabanalarga', 'Galapa', 'Puerto Colombia'],
+  Bolívar: ['Cartagena', 'Magangué', 'Turbaco', 'El Carmen de Bolívar', 'Mompox', 'Arjona'],
+  Boyacá: ['Tunja', 'Duitama', 'Sogamoso', 'Chiquinquirá', 'Paipa', 'Yopal'],
+  Caldas: ['Manizales', 'Villamaría', 'La Dorada', 'Riosucio', 'Chinchiná', 'Anserma'],
+  Caquetá: ['Florencia', 'San Vicente del Caguán', 'Puerto Rico', 'El Doncello', 'La Montañita'],
+  Casanare: ['Yopal', 'Aguazul', 'Villanueva', 'Tauramena', 'Paz de Ariporo'],
+  Cauca: ['Popayán', 'Santander de Quilichao', 'Puerto Tejada', 'El Bordo', 'Patía'],
+  Cesar: ['Valledupar', 'Aguachica', 'Codazzi', 'Bosconia', 'Curumaní'],
+  Chocó: ['Quibdó', 'Istmina', 'Tadó', 'Condoto', 'Riosucio'],
+  Córdoba: ['Montería', 'Cereté', 'Lorica', 'Sahagún', 'Tierralta', 'Montelíbano'],
+  Cundinamarca: ['Bogotá', 'Soacha', 'Zipaquirá', 'Facatativá', 'Chía', 'Fusagasugá', 'Mosquera', 'Madrid', 'Funza', 'Girardot'],
+  Guainía: ['Inírida', 'Barranco Minas'],
+  Guaviare: ['San José del Guaviare', 'El Retorno', 'Calamar', 'Miraflores'],
+  Huila: ['Neiva', 'Pitalito', 'Garzón', 'La Plata', 'Campoalegre'],
+  'La Guajira': ['Riohacha', 'Maicao', 'Uribia', 'Manaure', 'San Juan del Cesar'],
+  Magdalena: ['Santa Marta', 'Ciénaga', 'Fundación', 'Plato', 'El Banco'],
+  Meta: ['Villavicencio', 'Acacías', 'Granada', 'Cumaral', 'Puerto López'],
+  Nariño: ['Pasto', 'Tumaco', 'Ipiales', 'Túquerres', 'La Unión'],
+  'Norte de Santander': ['Cúcuta', 'Ocaña', 'Pamplona', 'Villa del Rosario', 'Los Patios'],
+  Putumayo: ['Mocoa', 'Puerto Asís', 'Orito', 'Valle del Guamuez', 'Sibundoy'],
+  Quindío: ['Armenia', 'Calarcá', 'Montenegro', 'Quimbaya', 'La Tebaida'],
+  Risaralda: ['Pereira', 'Dosquebradas', 'Santa Rosa de Cabal', 'La Virginia', 'Marsella'],
+  'San Andrés y Providencia': ['San Andrés', 'Providencia'],
+  Santander: ['Bucaramanga', 'Floridablanca', 'Girón', 'Piedecuesta', 'Barrancabermeja', 'Socorro'],
+  Sucre: ['Sincelejo', 'Corozal', 'Sampués', 'San Marcos', 'Tolú'],
+  Tolima: ['Ibagué', 'Espinal', 'Honda', 'Melgar', 'Chaparral'],
+  'Valle del Cauca': ['Cali', 'Palmira', 'Buenaventura', 'Tuluá', 'Buga', 'Cartago', 'Yumbo', 'Jamundí'],
+  Vaupés: ['Mitú', 'Carurú'],
+  Vichada: ['Puerto Carreño', 'La Primavera', 'Santa Rosalía'],
 };
 
 const WAVE_NAVY = [
@@ -65,11 +92,17 @@ export default function Register() {
       <input className="input-field" type="email" placeholder="Ingrese correo electrónico"
         value={f.correo} onChange={e => update('correo', e.target.value)} required />
 
-      <Select value={dep} onChange={v => { setDep(v); update('municipio', ''); }}
-        options={depOptions} placeholder="Selecciona el departamento" />
+      <div>
+        <label className="block text-xs font-semibold text-gray-500 mb-1 pl-1">Departamento</label>
+        <Select value={dep} onChange={v => { setDep(v); update('municipio', ''); }}
+          options={depOptions} placeholder="Selecciona el departamento" />
+      </div>
 
-      <Select value={f.municipio} onChange={v => update('municipio', v)}
-        options={munOptions} placeholder={dep ? 'Selecciona el municipio' : 'Primero elige departamento'} />
+      <div>
+        <label className="block text-xs font-semibold text-gray-500 mb-1 pl-1">Ciudad</label>
+        <Select value={f.municipio} onChange={v => update('municipio', v)}
+          options={munOptions} placeholder={dep ? 'Selecciona tu ciudad' : 'Primero elige departamento'} />
+      </div>
 
       <input className="input-field" placeholder="Ingrese su dirección"
         value={f.direccion} onChange={e => update('direccion', e.target.value)} />
