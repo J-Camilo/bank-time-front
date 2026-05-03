@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Clock, Calendar, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { CheckCircleOutlined, CloseCircleOutlined, StopOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { solicitudesService } from '../services/solicitudes';
 import { useToast } from '../components/ui/Toast';
@@ -256,9 +257,9 @@ export default function SolicitudesEnviadas() {
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Estado de la solicitud</p>
               <p className="text-sm text-gray-700">
                 {sel.estado === 'PENDIENTE'  ? `Pendiente por aceptación de ${sel.propietario_nombre} ${sel.propietario_apellido}` :
-                 sel.estado === 'ACEPTADA'   ? '✅ Solicitud aceptada' :
-                 sel.estado === 'RECHAZADA'  ? '❌ Solicitud rechazada' :
-                                               '🚫 Solicitud cancelada'}
+                 sel.estado === 'ACEPTADA'   ? <span className="flex items-center gap-1.5 text-green-600"><CheckCircleOutlined /> Solicitud aceptada</span> :
+                 sel.estado === 'RECHAZADA'  ? <span className="flex items-center gap-1.5 text-red-500"><CloseCircleOutlined /> Solicitud rechazada</span> :
+                                               <span className="flex items-center gap-1.5 text-gray-400"><StopOutlined /> Solicitud cancelada</span>}
               </p>
             </div>
 

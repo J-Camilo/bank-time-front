@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.2.2",
     "@reduxjs/toolkit": "^2.2.7",
+    "antd": "^6.3.7",
     "axios": "^1.7.7",
     "dayjs": "^1.11.13",
     "framer-motion": "^11.5.4",
