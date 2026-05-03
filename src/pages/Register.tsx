@@ -83,7 +83,7 @@ export default function Register() {
   const depOptions = Object.keys(DEPS).map(d => ({ value: d, label: d }));
   const munOptions = (DEPS[dep] || []).map(m => ({ value: m, label: m }));
 
-  const FormContent = () => (
+  const formFields = (
     <div className="space-y-3">
       <input className="input-field" placeholder="Ingrese su nombre"
         value={f.nombre} onChange={e => update('nombre', e.target.value)} required />
@@ -94,14 +94,24 @@ export default function Register() {
 
       <div>
         <label className="block text-xs font-semibold text-gray-500 mb-1 pl-1">Departamento</label>
-        <Select value={dep} onChange={v => { setDep(v); update('municipio', ''); }}
-          options={depOptions} placeholder="Selecciona el departamento" />
+        <Select
+          value={dep}
+          onChange={v => { setDep(v); update('municipio', ''); }}
+          options={depOptions}
+          placeholder="Selecciona el departamento"
+          searchable
+        />
       </div>
 
       <div>
         <label className="block text-xs font-semibold text-gray-500 mb-1 pl-1">Ciudad</label>
-        <Select value={f.municipio} onChange={v => update('municipio', v)}
-          options={munOptions} placeholder={dep ? 'Selecciona tu ciudad' : 'Primero elige departamento'} />
+        <Select
+          value={f.municipio}
+          onChange={v => update('municipio', v)}
+          options={munOptions}
+          placeholder={dep ? 'Selecciona tu ciudad' : 'Primero elige departamento'}
+          searchable
+        />
       </div>
 
       <input className="input-field" placeholder="Ingrese su dirección"
@@ -128,7 +138,6 @@ export default function Register() {
     <>
       {/* ── Mobile layout (< sm) ────────────────────────── */}
       <div className="sm:hidden min-h-screen bg-white flex flex-col">
-        {/* Navy top band */}
         <div
           className="bg-navy flex items-end justify-center pb-8 pt-14 flex-shrink-0"
           style={{ borderRadius: '0 0 40px 40px' }}
@@ -139,26 +148,22 @@ export default function Register() {
           </div>
         </div>
 
-        {/* Scrollable form */}
         <div className="flex-1 overflow-y-auto px-6 py-8">
           <form onSubmit={submit} className="w-full max-w-sm mx-auto">
-            <FormContent />
+            {formFields}
           </form>
         </div>
       </div>
 
       {/* ── Desktop layout (≥ sm) ────────────────────────── */}
       <div className="hidden sm:flex h-screen bg-white relative overflow-hidden">
-        {/* Navy left panel — with brand content */}
         <div className="flex-shrink-0 bg-navy relative flex flex-col justify-between py-14 px-10 overflow-hidden"
           style={{ width: '40%' }}>
-          {/* Decorative blobs */}
           <div className="absolute -top-16 -left-16 w-72 h-72 rounded-full opacity-10"
             style={{ background: 'radial-gradient(circle, #009ADB, transparent)' }} />
           <div className="absolute -bottom-20 -right-10 w-80 h-80 rounded-full opacity-10"
             style={{ background: 'radial-gradient(circle, #009ADB, transparent)' }} />
 
-          {/* Logo */}
           <div className="relative z-10 flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center">
               <Landmark size={22} className="text-white" />
@@ -166,7 +171,6 @@ export default function Register() {
             <span className="text-white font-black text-2xl tracking-tight">BOTIme.</span>
           </div>
 
-          {/* Main copy */}
           <div className="relative z-10">
             <h2 className="text-4xl font-black text-white leading-tight mb-4">
               Unite a la<br />comunidad<br />del tiempo.
@@ -176,7 +180,6 @@ export default function Register() {
             </p>
           </div>
 
-          {/* Feature pills */}
           <div className="relative z-10 space-y-3">
             {[
               { icon: <Handshake size={16} />, text: 'Intercambios sin dinero' },
@@ -191,7 +194,6 @@ export default function Register() {
           </div>
         </div>
 
-        {/* S-wave SVG */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           style={{ position: 'absolute', top: 0, left: 'calc(40% - 110px)', width: '220px', height: '100%' }}
@@ -202,7 +204,6 @@ export default function Register() {
           <motion.path d={WAVE_WHITE[0]} animate={{ d: WAVE_WHITE }} transition={wave} fill="white" />
         </svg>
 
-        {/* Form area — scrollable */}
         <div
           className="flex-1 flex items-center justify-center overflow-y-auto py-8"
           style={{ paddingLeft: '120px', paddingRight: '10%' }}
@@ -216,7 +217,7 @@ export default function Register() {
           >
             <h2 className="text-3xl font-black text-gray-900 mb-1">Crear cuenta</h2>
             <p className="text-sm text-gray-400 mb-6">Completá tus datos para registrarte</p>
-            <FormContent />
+            {formFields}
           </motion.form>
         </div>
       </div>

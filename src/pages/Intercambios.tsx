@@ -72,7 +72,7 @@ export default function Intercambios() {
         <h3 className={`font-bold text-base leading-snug mb-2 pr-16 ${s.text}`}>{i.publicacion_titulo}</h3>
         <div className="flex items-center justify-between">
           <span className={`flex items-center gap-1 text-xs ${active || i.estado === 'EN_CURSO' ? 'text-white/60' : 'text-gray-400'}`}>
-            <Clock size={11} /> {i.creditos_acordados} hora{i.creditos_acordados > 1 ? 's' : ''}
+            <Clock size={11} /> {i.creditos_acordados} crédito{i.creditos_acordados > 1 ? 's' : ''}
           </span>
           {i.estado === 'EN_CURSO' && (
             <button

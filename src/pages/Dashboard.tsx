@@ -62,10 +62,10 @@ export default function Dashboard() {
         color: dark ? 'white' : 'inherit',
       }}
     >
-      <div>
+      <div className="min-w-0 flex-1 pr-3">
         <p className={`text-xs font-semibold uppercase tracking-wide mb-2 ${dark ? 'text-white/60' : 'text-gray-400'}`}>{label}</p>
         <p className={`text-4xl md:text-5xl font-black leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>{value}</p>
-        <p className={`text-xs mt-2 ${dark ? 'text-sky-bright/70' : 'text-sky-mid'}`}>{sub}</p>
+        <p className={`text-xs mt-2 truncate ${dark ? 'text-sky-bright/70' : 'text-sky-mid'}`} title={sub}>{sub}</p>
       </div>
       <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${dark ? 'bg-white/15' : 'bg-navy/8 border border-navy/10'}`}>
         <ArrowUpRight size={17} className={dark ? 'text-white' : 'text-navy'} />
@@ -96,20 +96,20 @@ export default function Dashboard() {
         <StatCard
           value={ganados}
           label="Créditos ganados"
-          sub={lastGanancia ? `Último: ${dayjs(lastGanancia.fecha).format('DD/MM/YYYY')}` : 'Sin movimientos aún'}
+          sub={lastGanancia ? `Últimos créditos ganados: ${dayjs(lastGanancia.fecha).format('DD/MM/YYYY')}` : 'Últimos créditos ganados'}
           dark
           onClick={() => navigate('/historial')}
         />
         <StatCard
           value={gastados}
           label="Créditos gastados"
-          sub={lastConsumo ? `Último: ${dayjs(lastConsumo.fecha).format('DD/MM/YYYY')}` : 'Sin movimientos aún'}
+          sub={lastConsumo ? `Últimos créditos gastados: ${dayjs(lastConsumo.fecha).format('DD/MM/YYYY')}` : 'Últimos créditos gastados'}
           onClick={() => navigate('/historial')}
         />
         <StatCard
           value={solicitudes.length}
           label="Servicios solicitados"
-          sub={lastSolicitud ? lastSolicitud.publicacion_titulo : 'Sin solicitudes aún'}
+          sub={lastSolicitud ? `Último servicio solicitado: ${lastSolicitud.publicacion_titulo}` : 'Último servicio solicitado'}
           onClick={() => navigate('/solicitudes/mis')}
         />
       </div>
