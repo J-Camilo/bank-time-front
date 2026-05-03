@@ -27,7 +27,7 @@ const AppLayout = () => {
   if (!user) return <Navigate to="/login" replace />;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row p-2 gap-2 md:p-4 md:gap-4">
+    <div className="h-screen bg-gray-100 flex flex-col md:flex-row p-2 gap-2 md:p-4 md:gap-4 overflow-hidden">
       {/* Mobile overlay */}
       {navOpen && (
         <div
@@ -46,7 +46,7 @@ const AppLayout = () => {
       </div>
 
       {/* Right column */}
-      <div className="flex-1 flex flex-col gap-2 min-w-0 md:gap-4">
+      <div className="flex-1 flex flex-col gap-2 min-w-0 min-h-0 md:gap-4">
         <TopBar onMenuClick={() => setNavOpen(p => !p)} />
         <main
           className="flex-1 bg-white rounded-2xl overflow-y-auto"

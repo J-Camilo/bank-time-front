@@ -26,10 +26,16 @@ const TopBar = ({ onMenuClick }: TopBarProps) => {
   const notifRef = useRef<HTMLDivElement>(null);
   const userRef  = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const fetchNotifs = () => {
     notificacionesService.listar(false)
       .then(r => { setNotifs(r.data); setUnread(r.data.filter((n: Notif) => !n.leida).length); })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 30_000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
