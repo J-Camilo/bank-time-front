@@ -68,7 +68,7 @@ const PublicacionCard = ({ pub, onClick, index = 0 }: Props) => (
       )}
       <div className="flex items-center gap-2">
         <Calendar size={13} className="text-gray-400 flex-shrink-0" />
-        <span className="text-xs text-gray-500">{dayjs(pub.fecha_expiracion).format('DD/MM/YYYY')}</span>
+        <span className="text-xs text-gray-500">{dayjs(pub.fecha_expiracion.substring(0, 10)).format('DD/MM/YYYY')}</span>
       </div>
     </div>
   </motion.div>
