@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../store';
 import { publicacionesService } from '../services/publicaciones';
 import { usuariosService } from '../services/usuarios';
+import { solicitudesService } from '../services/solicitudes';
 import { PublicacionFormModal } from '../components/Modals/PublicacionFormModal';
 import { useToast } from '../components/ui/Toast';
 import dayjs from 'dayjs';
@@ -14,19 +15,24 @@ export default function Dashboard() {
   const user = useSelector((s: RootState) => s.auth.user);
   const navigate = useNavigate();
   const { show } = useToast();
-  const [pubs, setPubs]         = useState<any[]>([]);
-  const [creditos, setCreditos] = useState<any>({});
-  const [loading, setLoading]   = useState(true);
-  const [page, setPage]         = useState(1);
-  const [modal, setModal]       = useState(false);
-  const [editPub, setEditPub]   = useState<any>(null);
+  const [pubs, setPubs]             = useState<any[]>([]);
+  const [creditos, setCreditos]     = useState<any>({});
+  const [solicitudes, setSolicitudes] = useState<any[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [page, setPage]             = useState(1);
+  const [modal, setModal]           = useState(false);
+  const [editPub, setEditPub]       = useState<any>(null);
   const PER_PAGE = 6;
 
   const load = async () => {
     setLoading(true);
     try {
-      const [p, c] = await Promise.all([publicacionesService.miasPublicaciones(true), usuariosService.creditos()]);
-      setPubs(p.data); setCreditos(c.data);
+      const [p, c, s] = await Promise.all([
+        publicacionesService.miasPublicaciones(true),
+        usuariosService.creditos(),
+        solicitudesService.enviadas(),
+      ]);
+      setPubs(p.data); setCreditos(c.data); setSolicitudes(s.data);
     } catch { show('Error al cargar datos', 'error'); }
     finally { setLoading(false); }
   };
@@ -36,14 +42,18 @@ export default function Dashboard() {
   const movs = creditos.movimientos || [];
   const ganados  = movs.filter((m: any) => m.tipo === 'GANANCIA').reduce((a: number, m: any) => a + m.cantidad, 0);
   const gastados = movs.filter((m: any) => m.tipo === 'CONSUMO').reduce((a: number, m: any) => a + m.cantidad, 0);
+  const lastGanancia  = movs.find((m: any) => m.tipo === 'GANANCIA');
+  const lastConsumo   = movs.find((m: any) => m.tipo === 'CONSUMO');
+  const lastSolicitud = solicitudes[0];
   const paginated = pubs.slice((page - 1) * PER_PAGE, page * PER_PAGE);
   const totalPages = Math.ceil(pubs.length / PER_PAGE);
 
-  const StatCard = ({ value, label, sub, dark }: { value: number; label: string; sub: string; dark?: boolean }) => (
+  const StatCard = ({ value, label, sub, dark, onClick }: { value: number; label: string; sub: string; dark?: boolean; onClick?: () => void }) => (
     <motion.div
       whileHover={{ y: -3, scale: 1.01 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      className="rounded-2xl p-5 flex items-start justify-between"
+      onClick={onClick}
+      className={`rounded-2xl p-5 flex items-start justify-between ${onClick ? 'cursor-pointer' : ''}`}
       style={{
         background: dark
           ? 'linear-gradient(145deg, #003B54 0%, #005070 60%, #00405C 100%)'
@@ -83,9 +93,25 @@ export default function Dashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-7">
-        <StatCard value={ganados} label="Créditos ganados" sub="Últimos créditos ganados en: xxxx" dark />
-        <StatCard value={gastados} label="Créditos gastados" sub="Últimos créditos gastados en: xxxx" />
-        <StatCard value={pubs.filter(p => p.estado === 'ABIERTO').length} label="Servicios solicitados" sub="Último servicio solicitado es: xxxx" />
+        <StatCard
+          value={ganados}
+          label="Créditos ganados"
+          sub={lastGanancia ? `Último: ${dayjs(lastGanancia.fecha).format('DD/MM/YYYY')}` : 'Sin movimientos aún'}
+          dark
+          onClick={() => navigate('/historial')}
+        />
+        <StatCard
+          value={gastados}
+          label="Créditos gastados"
+          sub={lastConsumo ? `Último: ${dayjs(lastConsumo.fecha).format('DD/MM/YYYY')}` : 'Sin movimientos aún'}
+          onClick={() => navigate('/historial')}
+        />
+        <StatCard
+          value={solicitudes.length}
+          label="Servicios solicitados"
+          sub={lastSolicitud ? lastSolicitud.publicacion_titulo : 'Sin solicitudes aún'}
+          onClick={() => navigate('/solicitudes/mis')}
+        />
       </div>
 
       {/* Table */}
