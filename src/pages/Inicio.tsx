@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Filter, X } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import type { RootState } from '../store';
 import { publicacionesService } from '../services/publicaciones';
 import { categoriasService } from '../services/categorias';
 import PublicacionCard, { type Publicacion } from '../components/PublicacionCard/PublicacionCard';
@@ -12,6 +14,8 @@ import Select from '../components/ui/Select';
 export default function Inicio() {
   const [params] = useSearchParams();
   const { show } = useToast();
+  const navigate = useNavigate();
+  const user = useSelector((s: RootState) => s.auth.user);
   const q = params.get('q') || '';
 
   const [pubs, setPubs]             = useState<Publicacion[]>([]);
@@ -31,6 +35,8 @@ export default function Inicio() {
         categoriasService.listar(),
       ]);
       let data = pubRes.data.data as Publicacion[];
+      // Excluir las propias publicaciones del usuario
+      data = data.filter(p => String(p.usuario_id) !== String(user?.id));
       if (q) data = data.filter(p => p.titulo.toLowerCase().includes(q.toLowerCase()));
       setPubs(data);
       setCategorias(catRes.data);
@@ -127,7 +133,10 @@ export default function Inicio() {
         pub={modal.pub}
         open={modal.open}
         onClose={() => setModal({ open: false, pub: null })}
-        onSuccess={load}
+        onSuccess={() => {
+          setModal({ open: false, pub: null });
+          navigate('/solicitudes/mis');
+        }}
       />
     </div>
   );

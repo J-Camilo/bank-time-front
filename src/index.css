@@ -11,7 +11,7 @@
 
 @layer base {
   * { box-sizing: border-box; }
-  body { font-family: 'Inter', -apple-system, sans-serif; background: #f3f4f6; }
+  body { font-family: 'Poppins', -apple-system, sans-serif; background: #f3f4f6; }
   input, select, textarea { outline: none; }
 }
 

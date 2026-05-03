@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Clock, MapPin, Calendar, User, ArrowLeft } from 'lucide-react';
+import { Clock, User, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { solicitudesService } from '../services/solicitudes';
 import { useToast } from '../components/ui/Toast';
@@ -61,11 +61,14 @@ export default function SolicitudesRecibidas() {
           {s.publicacion_titulo}
         </h3>
         <span className={`flex items-center gap-1 text-xs ${active ? 'text-white/60' : 'text-gray-400'}`}>
-          <Clock size={11} /> 1 hora
+          <Clock size={11} /> {s.promedio_valoracion ? `★ ${Number(s.promedio_valoracion).toFixed(1)}` : 'Sin valoraciones'}
         </span>
       </motion.div>
     );
   };
+
+  const formatHora = (iso: string) => dayjs(iso).format('hh : mm');
+  const formatAmpm = (iso: string) => dayjs(iso).format('A');
 
   return (
     <div className="flex flex-col md:flex-row h-full">
@@ -95,50 +98,37 @@ export default function SolicitudesRecibidas() {
               <ArrowLeft size={16} /> Volver a solicitudes
             </button>
 
-            <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-4 leading-tight">{sel.publicacion_titulo}</h1>
-            <p className="text-sm text-gray-600 leading-relaxed mb-6 text-justify">
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-            </p>
+            <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-6 leading-tight">{sel.publicacion_titulo}</h1>
 
-            <div className="flex items-center gap-6 mb-4">
-              <span className="flex items-center gap-2 text-sm text-gray-500"><Clock size={14} /> 1 hora</span>
-              {sel.creditos_acordados != null && (
-                <span className="flex items-center gap-2 text-sm text-gray-500">
-                  <div className="w-5 h-5 rounded-full bg-sky-mid flex items-center justify-center">
-                    <span className="text-white text-[9px] font-bold">{sel.creditos_acordados}</span>
-                  </div>
-                  Créditos
-                </span>
-              )}
+            <div className="flex items-center gap-6 mb-6">
+              <span className="flex items-center gap-2 text-sm text-gray-500">
+                <Clock size={14} />
+                {sel.creditos_acordados != null ? `${sel.creditos_acordados} crédito(s)` : '1 crédito'}
+              </span>
             </div>
 
             <div className="mb-6">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Fecha y hora propuesta</p>
               <p className="text-sm text-gray-600 mb-2">Fecha que el usuario desea tomar el servicio</p>
-              <div className="flex items-center gap-3 mb-3 flex-wrap">
-                <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2">
-                  <span className="text-sm font-semibold">{dayjs(sel.fecha_propuesta || sel.fecha_solicitud).format('DD/MM/YYYY')}</span>
-                  <Calendar size={14} className="text-gray-400" />
-                </div>
-                <button className="text-xs font-semibold text-sky-mid hover:underline">VER DISPONIBILIDAD</button>
+              <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2 w-fit mb-4">
+                <span className="text-sm font-semibold">
+                  {dayjs(sel.fecha_propuesta || sel.fecha_solicitud).format('DD/MM/YYYY')}
+                </span>
               </div>
               <p className="text-sm text-gray-600 mb-2">Hora que el usuario propuso</p>
               <div className="flex items-center gap-2">
                 <div className="border border-gray-200 rounded-xl px-4 py-2 text-sm font-semibold text-gray-700">
-                  {dayjs(sel.fecha_propuesta || sel.fecha_solicitud).format('HH : mm')}
+                  {formatHora(sel.fecha_propuesta || sel.fecha_solicitud)}
                 </div>
-                <span className="text-sm text-gray-500">{dayjs(sel.fecha_propuesta || sel.fecha_solicitud).format('A')}</span>
+                <span className="text-sm text-gray-500">{formatAmpm(sel.fecha_propuesta || sel.fecha_solicitud)}</span>
               </div>
             </div>
 
             <div className="mb-6">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Nombre de usuario</p>
-              <div className="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
                 <User size={13} />
                 <span className="uppercase font-semibold">{sel.nombre} {sel.apellido}</span>
-                <span className="text-gray-300">|</span>
-                <MapPin size={13} />
-                <span>MED – CRA 89 #102 B09</span>
               </div>
             </div>
 
@@ -149,7 +139,7 @@ export default function SolicitudesRecibidas() {
 
             {sel.estado === 'PENDIENTE' && (
               <div className="flex gap-3 flex-wrap">
-                <button onClick={rechazar} disabled={acting} className="btn-outline">Actualizar y devolver</button>
+                <button onClick={rechazar} disabled={acting} className="btn-outline">Rechazar</button>
                 <button onClick={aceptar} disabled={acting} className="btn-primary">
                   {acting ? 'Procesando...' : 'Aceptar'}
                 </button>

@@ -115,7 +115,7 @@ export default function Dashboard() {
                       </span>
                     </td>
                     <td className="px-4 md:px-5 py-4 text-gray-600">{p.creditos_hora}</td>
-                    <td className="px-4 md:px-5 py-4 text-gray-600">{dayjs(p.fecha_expiracion).format('DD/MM/YYYY')}</td>
+                    <td className="px-4 md:px-5 py-4 text-gray-600">{dayjs(p.fecha_expiracion.substring(0, 10)).format('DD/MM/YYYY')}</td>
                     <td className="px-4 md:px-5 py-4">
                       <button onClick={() => { setEditPub(p); setModal(true); }}
                         className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
