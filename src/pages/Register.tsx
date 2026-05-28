@@ -66,6 +66,12 @@ export default function Register() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!f.nombre.trim())    return show('El nombre es obligatorio', 'error');
+    if (!f.apellido.trim())  return show('El apellido es obligatorio', 'error');
+    if (!f.correo.trim())    return show('El correo es obligatorio', 'error');
+    if (!dep)                return show('Seleccioná un departamento', 'error');
+    if (!f.municipio)        return show('Seleccioná una ciudad', 'error');
+    if (f.contrasena.length < 6) return show('La contraseña debe tener al menos 6 caracteres', 'error');
     if (f.contrasena !== f.confirmar) return show('Las contraseñas no coinciden', 'error');
     setLoading(true);
     try {
@@ -74,7 +80,10 @@ export default function Register() {
       show('¡Registro exitoso! Ahora puedes iniciar sesión.');
       navigate('/login');
     } catch (err: any) {
-      show(err.response?.data?.error || 'Error al registrarse', 'error');
+      const msg = err.response?.data?.error || '';
+      if (msg.toLowerCase().includes('correo')) show('El correo ya está registrado. Intentá con otro.', 'error');
+      else if (msg) show(msg, 'error');
+      else show('Error al registrarse. Revisá los datos e intentá de nuevo.', 'error');
     } finally { setLoading(false); }
   };
 

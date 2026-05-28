@@ -25,8 +25,8 @@ const groupByDate = (movs: any[]) => {
   return groups;
 };
 
-const calcPct = (curr: number, prev: number) => {
-  if (prev === 0) return curr > 0 ? 100 : 0;
+const calcPct = (curr: number, prev: number): number | null => {
+  if (prev === 0) return null;
   return Math.round(((curr - prev) / prev) * 100);
 };
 
@@ -94,7 +94,7 @@ export default function Historial() {
     );
   };
 
-  const StatItem = ({ icon, label, value, pct, up }: any) => (
+  const StatItem = ({ icon, label, value, pct, up, currMonth }: any) => (
     <div className="flex items-center gap-4 py-4 border-b border-gray-100 last:border-0">
       <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-sky-mid/10 flex items-center justify-center flex-shrink-0 text-sky-mid text-xl">
         {icon}
@@ -102,10 +102,13 @@ export default function Historial() {
       <div className="flex-1 min-w-0">
         <p className="text-xs text-gray-400 mb-0.5">{label}</p>
         <p className="text-2xl md:text-3xl font-black text-gray-900">{value}</p>
-        {pct !== undefined && (
+        {pct !== undefined && pct !== null && (
           <p className={`text-xs font-semibold ${up ? 'text-green-500' : 'text-red-400'}`}>
             {up ? '↑' : '↓'} {Math.abs(pct)}% este mes
           </p>
+        )}
+        {pct === null && currMonth > 0 && (
+          <p className="text-xs font-semibold text-sky-mid">Nuevo este mes</p>
         )}
       </div>
     </div>
@@ -171,10 +174,10 @@ export default function Historial() {
       {/* Right stats */}
       <div className="lg:w-72 lg:border-l border-t lg:border-t-0 border-gray-100 p-4 md:p-5 lg:flex-shrink-0 lg:overflow-y-auto">
         <StatItem icon={<SwapOutlined />}        label="Total de intercambios" value={historial.length} />
-        <StatItem icon={<PlusCircleOutlined />}  label="Créditos ganados"      value={ganados}
-          pct={pctGanados}  up={pctGanados >= 0} />
-        <StatItem icon={<MinusCircleOutlined />} label="Créditos gastados"     value={gastados}
-          pct={pctGastados} up={pctGastados <= 0} />
+        <StatItem icon={<PlusCircleOutlined />}  label="Créditos ganados"  value={ganados}
+          pct={pctGanados}  up={pctGanados !== null && pctGanados >= 0}   currMonth={ganadosMes} />
+        <StatItem icon={<MinusCircleOutlined />} label="Créditos gastados" value={gastados}
+          pct={pctGastados} up={pctGastados !== null && pctGastados <= 0} currMonth={gastadosMes} />
         <StatItem icon={<ClockCircleOutlined />} label="Último intercambio"    value={ultimoIntercambio} />
 
         {/* CTA */}

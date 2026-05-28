@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { CheckCircle, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle, Clock, Star } from 'lucide-react';
 import { CheckCircleOutlined } from '@ant-design/icons';
 import Modal from '../ui/Modal';
 import { intercambiosService } from '../../services/intercambios';
+import { valoracionesService } from '../../services/valoraciones';
 import { useToast } from '../ui/Toast';
 import dayjs from 'dayjs';
 
@@ -17,6 +18,17 @@ interface Props {
 export const ConfirmarModal = ({ intercambio: i, open, onClose, onSuccess, readonly = false }: Props) => {
   const { show } = useToast();
   const [loading, setLoading] = useState(false);
+  const [valoraciones, setValoraciones] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (open && readonly && i?.id) {
+      valoracionesService.porIntercambio(i.id)
+        .then(r => setValoraciones(r.data))
+        .catch(() => {});
+    } else {
+      setValoraciones([]);
+    }
+  }, [open, readonly, i?.id]);
 
   const confirmar = async () => {
     setLoading(true);
@@ -36,12 +48,22 @@ export const ConfirmarModal = ({ intercambio: i, open, onClose, onSuccess, reado
       <div className="space-y-5">
         <div className="text-center">
           <h2 className="text-2xl font-black text-gray-900">{i.publicacion_titulo}</h2>
-          {readonly && (
-            <span className="inline-block mt-1 text-xs font-semibold text-green-600 bg-green-50 border border-green-200 rounded-full px-3 py-0.5">
-              <CheckCircleOutlined className="mr-1" />Completado
-            </span>
-          )}
+          <span className={`inline-block mt-1 text-xs font-semibold rounded-full px-3 py-0.5 ${
+            readonly
+              ? 'text-green-600 bg-green-50 border border-green-200'
+              : 'text-orange-600 bg-orange-50 border border-orange-200'
+          }`}>
+            <CheckCircleOutlined className="mr-1" />
+            {readonly ? 'Completado' : i.estado.replace('_', ' ')}
+          </span>
         </div>
+
+        {readonly && (
+          <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 text-xs text-blue-700 font-medium">
+            <CheckCircleOutlined className="text-blue-500 flex-shrink-0" />
+            Ya existe una valoración registrada para este intercambio.
+          </div>
+        )}
 
         <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
           <span className="flex items-center gap-1.5">
@@ -106,6 +128,35 @@ export const ConfirmarModal = ({ intercambio: i, open, onClose, onSuccess, reado
             <button onClick={confirmar} disabled={loading} className="btn-primary">
               {loading ? 'Confirmando...' : 'Confirmar participación'}
             </button>
+          </div>
+        )}
+
+        {readonly && valoraciones.length > 0 && (
+          <div className="space-y-3">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Valoraciones</p>
+            {valoraciones.map((v: any) => (
+              <div key={v.id} className="rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-semibold text-gray-700">
+                    {v.evaluador_nombre} {v.evaluador_apellido}
+                    <span className="text-gray-400 font-normal"> → </span>
+                    {v.evaluado_nombre} {v.evaluado_apellido}
+                  </span>
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <Star
+                        key={idx}
+                        size={12}
+                        className={idx < v.calificacion ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {v.comentario && (
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">"{v.comentario}"</p>
+                )}
+              </div>
+            ))}
           </div>
         )}
 

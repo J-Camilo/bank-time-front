@@ -1,0 +1,10 @@
+services:
+
+  frontend:
+    image: botime-frontend
+    build:
+      context: .
+      args:
+        VITE_API_URL: https://bank-time-ten.vercel.app/api/v1
+    ports:
+      - "80:80"

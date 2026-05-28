@@ -134,7 +134,7 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
             style={{ boxShadow: 'var(--shadow-ui)' }}
             value={f.titulo}
             onChange={e => up('titulo', e.target.value)}
-            placeholder="Clase de inglés"
+            placeholder="Ej: Clases de guitarra, Reparación de bicicletas..."
             required
           />
         </div>

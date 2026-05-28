@@ -4,4 +4,6 @@ export const valoracionesService = {
     api.post('/valoraciones', { intercambio_id, calificacion, comentario }),
   listarPorUsuario: (usuarioId: number) =>
     api.get(`/valoraciones/usuario/${usuarioId}`),
+  porIntercambio: (intercambioId: number) =>
+    api.get(`/valoraciones/intercambio/${intercambioId}`),
 };
