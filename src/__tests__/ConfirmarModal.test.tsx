@@ -12,7 +12,7 @@ vi.mock('../services/intercambios', () => ({
 
 vi.mock('../services/valoraciones', () => ({
   valoracionesService: {
-    porIntercambio: vi.fn().mockResolvedValue({ data: [] }),
+    porIntercambio: vi.fn().mockResolvedValue({ data: [] } as any),
   },
 }));
 
@@ -51,7 +51,7 @@ describe('ConfirmarModal — modo readonly', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(valoracionesService.porIntercambio).mockResolvedValue({ data: [] });
+    vi.mocked(valoracionesService.porIntercambio).mockResolvedValue({ data: [] } as any);
   });
 
   it('muestra el título de la publicación', () => {
@@ -94,7 +94,7 @@ describe('ConfirmarModal — modo readonly', () => {
           comentario: 'Muy buen servicio',
         },
       ],
-    });
+    } as any);
 
     render(
       <ConfirmarModal
