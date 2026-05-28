@@ -10,25 +10,7 @@ import { usuariosService } from '../services/usuarios';
 import { useToast } from '../components/ui/Toast';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-
-const groupByDate = (movs: any[]) => {
-  const groups: Record<string, any[]> = {};
-  movs.forEach(m => {
-    const key = dayjs(m.fecha).format('YYYY-MM-DD');
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(m);
-  });
-  // más reciente primero dentro de cada grupo
-  Object.keys(groups).forEach(k =>
-    groups[k].sort((a, b) => dayjs(b.fecha).valueOf() - dayjs(a.fecha).valueOf())
-  );
-  return groups;
-};
-
-const calcPct = (curr: number, prev: number): number | null => {
-  if (prev === 0) return null;
-  return Math.round(((curr - prev) / prev) * 100);
-};
+import { calcPct, groupByDate } from '../utils/historial.utils';
 
 export default function Historial() {
   const { show } = useToast();
