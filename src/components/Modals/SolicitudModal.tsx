@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, Star, AlertCircle } from 'lucide-react';
+import { Clock, AlertCircle } from 'lucide-react';
 import Modal from '../ui/Modal';
 import { solicitudesService } from '../../services/solicitudes';
 import { publicacionesService } from '../../services/publicaciones';
@@ -104,12 +104,6 @@ export const SolicitudModal = ({ pub, open, onClose, onSuccess }: Props) => {
             {pub.creditos_hora} crédito{pub.creditos_hora !== 1 ? 's' : ''} / hora
           </span>
           <span className="text-xs text-gray-400">· Duración máx. {duracion}h</span>
-          {pub.promedio_valoracion != null && (pub.total_valoraciones ?? 0) > 0 && (
-            <span className="flex items-center gap-1.5 text-sm text-gray-500">
-              <Star size={13} className="text-yellow-400 fill-yellow-400" />
-              {Number(pub.promedio_valoracion).toFixed(1)}
-            </span>
-          )}
         </div>
 
         {/* Selector de horas */}
