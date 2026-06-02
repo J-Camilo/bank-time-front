@@ -7,7 +7,9 @@ export interface Publicacion {
   estado: 'ABIERTO' | 'EXPIRADO'; creditos_hora: number;
   duracion_horas: number;
   fecha_expiracion: string; categoria_nombre?: string;
-  nombre?: string; apellido?: string; promedio_valoracion?: number;
+  nombre?: string; apellido?: string;
+  promedio_valoracion?: number | null;
+  total_valoraciones?: number;
   municipio?: string; usuario_id?: number;
 }
 
@@ -63,7 +65,7 @@ const PublicacionCard = ({ pub, onClick, index = 0 }: Props) => (
           {pub.creditos_hora} {pub.creditos_hora === 1 ? 'crédito' : 'créditos'} / hora
         </span>
       </div>
-      {pub.promedio_valoracion != null ? (
+      {pub.promedio_valoracion != null && (pub.total_valoraciones ?? 0) > 0 ? (
         <div className="flex items-center gap-2">
           <Star size={13} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />
           <span className="text-xs text-gray-500">{Number(pub.promedio_valoracion).toFixed(1)}</span>
