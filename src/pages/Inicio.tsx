@@ -40,6 +40,14 @@ export default function Inicio() {
       let data = pubRes.data.data as Publicacion[];
       data = data.filter(p => String(p.usuario_id) !== String(user?.id));
       if (q) data = data.filter(p => p.titulo.toLowerCase().includes(q.toLowerCase()));
+
+      if (sortBy === 'valorados') {
+        data = [...data].sort((a, b) => (b.promedio_valoracion ?? 0) - (a.promedio_valoracion ?? 0));
+      } else if (sortBy === 'creditos') {
+        data = [...data].sort((a, b) => b.creditos_hora - a.creditos_hora);
+      }
+      // 'recientes' → el backend ya devuelve los más recientes primero
+
       setPubs(data);
       setCategorias(catRes.data);
     } catch { show('Error al cargar publicaciones', 'error'); }

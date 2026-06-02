@@ -1,27 +1,39 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, XAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from 'recharts';
 import {
   SwapOutlined, PlusCircleOutlined, MinusCircleOutlined,
   ClockCircleOutlined, ArrowUpOutlined, ArrowDownOutlined,
   ExclamationCircleOutlined, GiftOutlined,
 } from '@ant-design/icons';
 import { usuariosService } from '../services/usuarios';
+import { intercambiosService } from '../services/intercambios';
 import { useToast } from '../components/ui/Toast';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { calcPct, groupByDate } from '../utils/historial.utils';
+import { ConfirmarModal } from '../components/Modals/ConfirmarModal';
 
 export default function Historial() {
   const { show } = useToast();
   const navigate = useNavigate();
-  const [historial, setHistorial] = useState<any[]>([]);
-  const [creditos, setCreditos]   = useState<any>({});
-  const [loading, setLoading]     = useState(true);
+  const [historial, setHistorial]   = useState<any[]>([]);
+  const [intercambios, setIntercambios] = useState<any[]>([]);
+  const [creditos, setCreditos]     = useState<any>({});
+  const [loading, setLoading]       = useState(true);
+  const [detalleModal, setDetalleModal] = useState<{ open: boolean; item: any }>({ open: false, item: null });
 
   useEffect(() => {
-    Promise.all([usuariosService.historial(), usuariosService.creditos()])
-      .then(([h, c]) => { setHistorial(h.data); setCreditos(c.data); })
+    Promise.all([
+      usuariosService.historial(),
+      usuariosService.creditos(),
+      intercambiosService.listar(),
+    ])
+      .then(([h, c, ix]) => {
+        setHistorial(h.data);
+        setCreditos(c.data);
+        setIntercambios(ix.data);
+      })
       .catch(() => show('Error al cargar historial', 'error'))
       .finally(() => setLoading(false));
   }, []);
@@ -39,10 +51,10 @@ export default function Historial() {
     movs.filter(m => m.tipo === tipo && dayjs(m.fecha).month() === month && dayjs(m.fecha).year() === year)
         .reduce((a: number, m: any) => a + m.cantidad, 0);
 
-  const ganados        = movs.filter(m => m.tipo === 'GANANCIA').reduce((a, m) => a + m.cantidad, 0);
+  const ganados        = movs.filter(m => m.tipo === 'GANANCIA' || m.tipo === 'ASIGNACION_INICIAL').reduce((a, m) => a + m.cantidad, 0);
   const gastados       = movs.filter(m => m.tipo === 'CONSUMO').reduce((a, m) => a + m.cantidad, 0);
-  const ganadosMes     = filterMovs('GANANCIA', thisMonth, thisYear);
-  const ganadosPrev    = filterMovs('GANANCIA', prevMonth, prevYear);
+  const ganadosMes     = filterMovs('GANANCIA', thisMonth, thisYear) + filterMovs('ASIGNACION_INICIAL', thisMonth, thisYear);
+  const ganadosPrev    = filterMovs('GANANCIA', prevMonth, prevYear) + filterMovs('ASIGNACION_INICIAL', prevMonth, prevYear);
   const gastadosMes    = filterMovs('CONSUMO',  thisMonth, thisYear);
   const gastadosPrev   = filterMovs('CONSUMO',  prevMonth, prevYear);
   const pctGanados     = calcPct(ganadosMes, ganadosPrev);
@@ -96,6 +108,36 @@ export default function Historial() {
     </div>
   );
 
+  const findIntercambio = (m: any): any | null => {
+    const allSources = [...intercambios, ...historial];
+
+    // intento 1: campo directo intercambio_id (confirmado en movimientos_credito)
+    if (m.intercambio_id != null) {
+      const found = allSources.find((h: any) => h.id === m.intercambio_id);
+      if (found) return found;
+    }
+    // intento 2: parsear "#N" de la descripción como fallback
+    const match = (m.descripcion || '').match(/#(\d+)/);
+    if (match) {
+      const id = parseInt(match[1]);
+      const found = allSources.find((h: any) => h.id === id);
+      if (found) return found;
+    }
+    return null;
+  };
+
+  const getMovTitle = (m: any): string => {
+    if (m.tipo === 'ASIGNACION_INICIAL') return 'Créditos iniciales de registro';
+    const intercambio = findIntercambio(m);
+    if (intercambio?.publicacion_titulo) return intercambio.publicacion_titulo;
+    return m.descripcion || 'Movimiento de créditos';
+  };
+
+  const handleMovClick = (m: any) => {
+    const intercambio = findIntercambio(m);
+    if (intercambio) setDetalleModal({ open: true, item: intercambio });
+  };
+
   const ultimoIntercambio = historial.length > 0
     ? dayjs(historial[0].fecha_acordada || historial[0].created_at).format('DD/MM')
     : '–';
@@ -107,17 +149,41 @@ export default function Historial() {
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Historial</p>
         <p className="text-sm text-gray-500 mb-4 capitalize">01 – 31 {dayjs().format('MMMM, YYYY')}</p>
 
-        {/* Bar chart */}
-        <div className="h-24 mb-6">
+        {/* Area chart */}
+        <div className="h-36 mb-6 -mx-2">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} barSize={8}>
-              <XAxis dataKey="day" hide />
-              <Tooltip
-                contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 12 }}
-                formatter={(v: any) => [`${v} créditos`, '']}
+            <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -24, bottom: 0 }}>
+              <defs>
+                <linearGradient id="gradCreditos" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#009ADB" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="#009ADB" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} stroke="#f0f0f0" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="day"
+                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                axisLine={false}
+                tickLine={false}
+                interval={2}
               />
-              <Bar dataKey="value" fill="#009ADB" radius={[4, 4, 0, 0]} />
-            </BarChart>
+              <YAxis hide allowDecimals={false} />
+              <Tooltip
+                contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: 12, padding: '8px 12px' }}
+                formatter={(v: any) => [`${v} crédito${v !== 1 ? 's' : ''}`, '']}
+                labelStyle={{ color: '#6b7280', fontWeight: 600 }}
+                cursor={{ stroke: '#009ADB', strokeWidth: 1, strokeDasharray: '4 2' }}
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="#009ADB"
+                strokeWidth={2.5}
+                fill="url(#gradCreditos)"
+                dot={false}
+                activeDot={{ r: 5, fill: '#009ADB', stroke: '#fff', strokeWidth: 2 }}
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
 
@@ -132,22 +198,48 @@ export default function Historial() {
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-gray-900 capitalize">{dateLabel(date)}</h3>
               </div>
-              {grouped[date].map((m: any, i) => (
-                <motion.div key={m.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04 }}
-                  className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
-                  <TypeIcon tipo={m.tipo} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-800 truncate">{m.descripcion || 'Movimiento de créditos'}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{dayjs(m.fecha).format('h:mm a')}</p>
-                  </div>
-                  <span className={`text-sm font-black flex-shrink-0 ${
-                    m.tipo === 'GANANCIA' || m.tipo === 'ASIGNACION_INICIAL' ? 'text-gray-900' : 'text-red-500'
-                  }`}>
-                    {m.tipo === 'GANANCIA' || m.tipo === 'ASIGNACION_INICIAL' ? '+' : '-'}{m.cantidad}
-                  </span>
-                </motion.div>
-              ))}
+              {grouped[date].map((m: any, idx) => {
+                const intercambio = findIntercambio(m);
+                const isPositive  = m.tipo === 'GANANCIA' || m.tipo === 'ASIGNACION_INICIAL';
+
+                let contraparte = '';
+                if (intercambio) {
+                  if (m.tipo === 'GANANCIA') {
+                    contraparte = `Recibido de ${intercambio.receptor_nombre ?? intercambio.prestador_nombre ?? ''}`.trim();
+                  } else if (m.tipo === 'CONSUMO') {
+                    contraparte = `Pagado a ${intercambio.prestador_nombre ?? ''}`.trim();
+                  }
+                }
+
+                return (
+                  <motion.div key={m.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.04 }}
+                    onClick={() => handleMovClick(m)}
+                    className={`flex items-start gap-3 py-3 border-b border-gray-50 last:border-0 rounded-xl -mx-2 px-2 transition-colors ${intercambio ? 'cursor-pointer hover:bg-gray-50' : ''}`}>
+                    <TypeIcon tipo={m.tipo} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 truncate">{getMovTitle(m)}</p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
+                        <p className="text-xs text-gray-400">{dayjs(m.fecha).format('h:mm a')}</p>
+                        {contraparte && (
+                          <p className="text-xs text-gray-400 truncate">{contraparte}</p>
+                        )}
+                        {intercambio?.fecha_acordada && (
+                          <p className="text-xs text-gray-300">
+                            · servicio {dayjs(intercambio.fecha_acordada).format('DD/MM/YYYY')}
+                          </p>
+                        )}
+                      </div>
+                      {intercambio && (
+                        <p className="text-xs text-sky-mid mt-1 font-medium">Ver detalle →</p>
+                      )}
+                    </div>
+                    <span className={`text-sm font-black flex-shrink-0 pt-0.5 ${isPositive ? 'text-gray-900' : 'text-red-500'}`}>
+                      {isPositive ? '+' : '-'}{m.cantidad}
+                    </span>
+                  </motion.div>
+                );
+              })}
             </div>
           ))
         )}
@@ -172,6 +264,12 @@ export default function Historial() {
           </button>
         </div>
       </div>
+      <ConfirmarModal
+        intercambio={detalleModal.item}
+        open={detalleModal.open}
+        onClose={() => setDetalleModal({ open: false, item: null })}
+        readonly
+      />
     </div>
   );
 }

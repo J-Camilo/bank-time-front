@@ -80,10 +80,20 @@ export default function Register() {
       show('¡Registro exitoso! Ahora puedes iniciar sesión.');
       navigate('/login');
     } catch (err: any) {
-      const msg = err.response?.data?.error || '';
-      if (msg.toLowerCase().includes('correo')) show('El correo ya está registrado. Intentá con otro.', 'error');
-      else if (msg) show(msg, 'error');
-      else show('Error al registrarse. Revisá los datos e intentá de nuevo.', 'error');
+      const data = err.response?.data;
+      let msg = '';
+      if (typeof data === 'string') {
+        msg = data;
+      } else if (data?.error) {
+        msg = data.error;
+      } else if (data?.message) {
+        msg = data.message;
+      } else if (Array.isArray(data?.errors)) {
+        msg = data.errors.map((e: any) => e.message || e.msg || String(e)).join(' · ');
+      } else if (Array.isArray(data)) {
+        msg = data.map((e: any) => e.message || e.msg || String(e)).join(' · ');
+      }
+      show(msg || 'Error al registrarse. Revisá los datos e intentá de nuevo.', 'error');
     } finally { setLoading(false); }
   };
 

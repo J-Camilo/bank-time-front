@@ -40,9 +40,9 @@ export default function Dashboard() {
   useEffect(() => { load(); }, []);
 
   const movs = creditos.movimientos || [];
-  const ganados  = movs.filter((m: any) => m.tipo === 'GANANCIA').reduce((a: number, m: any) => a + m.cantidad, 0);
+  const ganados  = movs.filter((m: any) => m.tipo === 'GANANCIA' || m.tipo === 'ASIGNACION_INICIAL').reduce((a: number, m: any) => a + m.cantidad, 0);
   const gastados = movs.filter((m: any) => m.tipo === 'CONSUMO').reduce((a: number, m: any) => a + m.cantidad, 0);
-  const lastGanancia  = movs.find((m: any) => m.tipo === 'GANANCIA');
+  const lastGanancia  = movs.find((m: any) => m.tipo === 'GANANCIA' || m.tipo === 'ASIGNACION_INICIAL');
   const lastConsumo   = movs.find((m: any) => m.tipo === 'CONSUMO');
   const lastSolicitud = solicitudes[0];
   const paginated = pubs.slice((page - 1) * PER_PAGE, page * PER_PAGE);

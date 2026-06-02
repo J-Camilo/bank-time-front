@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { User, Clock, MapPin, Calendar } from 'lucide-react';
+import { User, Clock, MapPin, Calendar, Star } from 'lucide-react';
 import dayjs from 'dayjs';
 
 export interface Publicacion {
   id: number; titulo: string; descripcion: string;
   estado: 'ABIERTO' | 'EXPIRADO'; creditos_hora: number;
+  duracion_horas: number;
   fecha_expiracion: string; categoria_nombre?: string;
   nombre?: string; apellido?: string; promedio_valoracion?: number;
   municipio?: string; usuario_id?: number;
@@ -58,8 +59,21 @@ const PublicacionCard = ({ pub, onClick, index = 0 }: Props) => (
       )}
       <div className="flex items-center gap-2">
         <Clock size={13} className="text-gray-400 flex-shrink-0" />
-        <span className="text-xs text-gray-500">1 hora</span>
+        <span className="text-xs text-gray-500">
+          {pub.creditos_hora} {pub.creditos_hora === 1 ? 'crédito' : 'créditos'} / hora
+        </span>
       </div>
+      {pub.promedio_valoracion != null ? (
+        <div className="flex items-center gap-2">
+          <Star size={13} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />
+          <span className="text-xs text-gray-500">{Number(pub.promedio_valoracion).toFixed(1)}</span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <Star size={13} className="text-gray-200 flex-shrink-0" />
+          <span className="text-xs text-gray-300">Sin valoraciones</span>
+        </div>
+      )}
       {pub.municipio && (
         <div className="flex items-center gap-2">
           <MapPin size={13} className="text-gray-400 flex-shrink-0" />

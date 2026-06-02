@@ -8,4 +8,6 @@ export const publicacionesService = {
   actualizar: (id: number, data: any) => api.put(`/publicaciones/${id}`, data),
   eliminar: (id: number) => api.delete(`/publicaciones/${id}`),
   matches: (id: number) => api.get(`/publicaciones/${id}/matches`),
+  disponibilidad: (id: number, fecha: string) =>
+    api.get(`/publicaciones/${id}/disponibilidad`, { params: { fecha } }),
 };

@@ -28,12 +28,16 @@ api.interceptors.response.use(res => res, async (error) => {
   const status   = error.response?.status;
   const code     = error.response?.data?.code;
 
-  // Solo manejamos 401 o TOKEN_EXPIRED
-  if ((status !== 401 && code !== 'TOKEN_EXPIRED') || original._retry) {
+  // Solo hacemos refresh cuando el backend dice explícitamente TOKEN_EXPIRED
+  // "Token inválido" u otros 401 → sesión irrecuperable → logout inmediato
+  if (code !== 'TOKEN_EXPIRED' || original._retry) {
+    if (status === 401 && !original._retry) {
+      forceLogout();
+    }
     return Promise.reject(error);
   }
 
-  // Si ya estamos refrescando, encolar esta request
+  // A partir de acá: TOKEN_EXPIRED, primer intento → intentar refresh
   if (refreshing) {
     return new Promise((resolve, reject) => {
       queue.push({

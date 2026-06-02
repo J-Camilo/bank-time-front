@@ -30,7 +30,7 @@ const SpinInput = ({ label, value, min = 1, max = 99, onChange }: {
 );
 
 const EMPTY = {
-  titulo: '', creditos: 1, horas: 1, fecha_expiracion: '',
+  titulo: '', creditos: 1, duracion_horas: 1, fecha_expiracion: '',
   descripcion: '', ubicacion: '', direccion: '', categoria_id: '',
 };
 
@@ -52,7 +52,7 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
       setF({
         titulo:           pub.titulo || '',
         creditos:         pub.creditos_hora || 1,
-        horas:            1,
+        duracion_horas:   pub.duracion_horas || 1,
         fecha_expiracion: pub.fecha_expiracion ? pub.fecha_expiracion.substring(0, 10) : '',
         descripcion:      pub.descripcion || '',
         ubicacion:        pub.municipio || '',
@@ -73,6 +73,7 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
         titulo:           f.titulo,
         descripcion:      f.descripcion,
         creditos_hora:    f.creditos,
+        duracion_horas:   f.duracion_horas,
         fecha_expiracion: f.fecha_expiracion,
         categoria_id:     parseInt(f.categoria_id),
       };
@@ -150,10 +151,10 @@ export const PublicacionFormModal = ({ pub, open, onClose, onSuccess }: Props) =
           />
         </div>
 
-        {/* Créditos · Horas · Fecha */}
+        {/* Créditos · Duración · Fecha */}
         <div className="grid grid-cols-3 gap-3">
-          <SpinInput label="Créditos" value={f.creditos} max={24} onChange={v => up('creditos', v)} />
-          <SpinInput label="Horas propuesta" value={f.horas} onChange={v => up('horas', v)} />
+          <SpinInput label="Créditos / hora" value={f.creditos} max={99} onChange={v => up('creditos', v)} />
+          <SpinInput label="Duración (horas)" value={f.duracion_horas} min={1} max={24} onChange={v => up('duracion_horas', v)} />
 
           <div>
             <label className="text-xs font-medium text-gray-400 mb-1.5 block">Fecha de expiración</label>
