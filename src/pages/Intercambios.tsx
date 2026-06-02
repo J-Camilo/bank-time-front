@@ -74,7 +74,7 @@ export default function Intercambios() {
           <span className={`flex items-center gap-1 text-xs ${active || i.estado === 'EN_CURSO' ? 'text-white/60' : 'text-gray-400'}`}>
             <Clock size={11} /> {i.creditos_acordados} crédito{i.creditos_acordados > 1 ? 's' : ''}
           </span>
-          {i.estado === 'EN_CURSO' && (
+          {(i.estado === 'EN_ESPERA' || i.estado === 'EN_CURSO') && (
             <button
               onClick={e => { e.stopPropagation(); setConfirmar({ open: true, item: i }); }}
               className="w-7 h-7 rounded-full bg-green-400 flex items-center justify-center hover:bg-green-500 transition-colors"
@@ -142,26 +142,34 @@ export default function Intercambios() {
 
         {/* Time slots */}
         <div ref={calendarScrollRef} className="flex-1 overflow-y-auto">
-          <div className="relative">
+          <div className="relative" style={{ height: `${24 * 52}px` }}>
+            {/* Hour grid lines */}
             {HOURS.map(h => {
               const label = h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`;
-              const slotIntercambios = dayIntercambios.filter(i => dayjs(i.fecha_acordada).hour() === h);
               return (
-                <div key={h} className="flex items-start gap-3 min-h-[52px] border-b border-gray-50">
+                <div key={h} className="absolute left-0 right-0 flex items-start gap-3 border-b border-gray-50"
+                  style={{ top: `${h * 52}px`, height: '52px' }}>
                   <span className="text-xs text-gray-400 w-12 text-right flex-shrink-0 pt-1">{label}</span>
-                  <div className="flex-1 relative">
-                    {slotIntercambios.map(i => (
-                      <motion.div key={i.id}
-                        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                        className="absolute top-0.5 left-0 right-0 bg-sky-mid text-white rounded-lg px-3 py-1.5 text-xs font-semibold z-10"
-                      >
-                        <p className="font-bold truncate uppercase">{i.publicacion_titulo}</p>
-                        <p className="text-white/70">{dayjs(i.fecha_acordada).format('HH:mm')} – {i.prestador_nombre}</p>
-                      </motion.div>
-                    ))}
-                    <div className="h-12" />
-                  </div>
                 </div>
+              );
+            })}
+
+            {/* Events — posición y altura según hora y duración real */}
+            {dayIntercambios.map(i => {
+              const startH = dayjs(i.fecha_acordada).hour();
+              const startM = dayjs(i.fecha_acordada).minute();
+              const top    = startH * 52 + (startM / 60) * 52;
+              const durationHours = i.creditos_acordados || 1;
+              const height = Math.max(durationHours * 52 - 4, 28);
+              return (
+                <motion.div key={i.id}
+                  initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                  className="absolute bg-sky-mid text-white rounded-lg px-3 py-1.5 text-xs font-semibold z-10 overflow-hidden"
+                  style={{ top: top + 2, height, left: 'calc(3rem + 12px)', right: 4 }}
+                >
+                  <p className="font-bold truncate uppercase">{i.publicacion_titulo}</p>
+                  <p className="text-white/70">{dayjs(i.fecha_acordada).format('HH:mm')} – {i.prestador_nombre}</p>
+                </motion.div>
               );
             })}
           </div>

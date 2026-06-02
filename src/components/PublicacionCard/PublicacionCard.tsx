@@ -5,8 +5,11 @@ import dayjs from 'dayjs';
 export interface Publicacion {
   id: number; titulo: string; descripcion: string;
   estado: 'ABIERTO' | 'EXPIRADO'; creditos_hora: number;
+  duracion_horas: number;
   fecha_expiracion: string; categoria_nombre?: string;
-  nombre?: string; apellido?: string; promedio_valoracion?: number;
+  nombre?: string; apellido?: string;
+  promedio_valoracion?: number | null;
+  total_valoraciones?: number;
   municipio?: string; usuario_id?: number;
 }
 
@@ -58,7 +61,9 @@ const PublicacionCard = ({ pub, onClick, index = 0 }: Props) => (
       )}
       <div className="flex items-center gap-2">
         <Clock size={13} className="text-gray-400 flex-shrink-0" />
-        <span className="text-xs text-gray-500">1 hora</span>
+        <span className="text-xs text-gray-500">
+          {pub.creditos_hora} {pub.creditos_hora === 1 ? 'crédito' : 'créditos'} / hora
+        </span>
       </div>
       {pub.municipio && (
         <div className="flex items-center gap-2">
